@@ -6,15 +6,23 @@ import struct
 import pickle
 from xmlrpc.client import ServerProxy
 import base64
+from enum import Enum
 
 import proto.liqi_pb2 as pb
 from google.protobuf.json_format import MessageToDict
 
+
+class MsgType(Enum):
+    Notify = 1
+    Req = 2
+    Res = 3
+
+
 class LiqiProto:
     #解析一局的WS消息队列
-    tot = 0  # 当前解析指针
+    tot = 0  # 当前总共解析的包数量
     # (method_name:str,pb.MethodObj) for 256 sliding windows; req->res
-    res_type = [None for i in range(256)]
+    res_type = dict() # int -> (method_name,pb2obj)
     jsonProto = json.load(open('proto/liqi.json', 'r'))
 
     def parse(self, flow_msg) -> bool:
@@ -23,8 +31,8 @@ class LiqiProto:
         from_client = flow_msg.from_client
         result = dict()
 
-        msg_type = ('', 'notify', 'req', 'res')[buf[0]]  # 通信报文类型
-        if msg_type == 'notify':
+        msg_type = MsgType(buf[0])  # 通信报文类型
+        if msg_type == MsgType.Notify:
             msg_block = analysis_protobuf(buf[1:])      # 解析剩余报文结构
             method_name = msg_block[0]['data'].decode()
             """
@@ -50,10 +58,10 @@ class LiqiProto:
             [{'id': 1, 'type': 'string', 'data': b'.lq.FastTest.authGame'},
             {'id': 2, 'type': 'string','data': b'protobuf_bytes'}]
             """
-            if msg_type == 'req':
-                assert(msg_id < 256)
+            if msg_type == MsgType.Req:
+                assert(msg_id < 1<<16)
                 assert(len(msg_block) == 2)
-                assert(self.res_type[msg_id] == None)
+                assert(msg_id not in self.res_type)
                 method_name = msg_block[0]['data'].decode()
                 _, lq, service, rpc = method_name.split('.')
                 proto_domain = self.jsonProto['nested'][lq]['nested'][service]['methods'][rpc]
@@ -62,15 +70,15 @@ class LiqiProto:
                 dict_obj = MessageToDict(proto_obj)
                 self.res_type[msg_id] = (method_name, getattr(
                     pb, proto_domain['responseType']))  # wait response
-            elif msg_type == 'res':
+            elif msg_type == MsgType.Res:
                 assert(len(msg_block[0]['data']) == 0)
-                assert(self.res_type[msg_id] != None)
-                method_name, liqi_pb2_res = self.res_type[msg_id]
-                self.res_type[msg_id] = None
+                assert(msg_id in self.res_type)
+                method_name, liqi_pb2_res = self.res_type.pop(msg_id)
                 proto_obj = liqi_pb2_res.FromString(msg_block[1]['data'])
                 dict_obj = MessageToDict(proto_obj)
-        result = {'id': self.tot, 'type': msg_type,
+        result = {'id': msg_id, 'type': msg_type,
                   'method': method_name, 'data': dict_obj}
+        self.tot+=1
         return result
 
 
@@ -145,5 +153,5 @@ def replayWebSocket():
 
 
 if __name__ == '__main__':
-    dumpWebSocket()
-    #replayWebSocket()
+    #dumpWebSocket()
+    replayWebSocket()
