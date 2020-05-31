@@ -9,7 +9,7 @@ from xmlrpc.client import ServerProxy
 from typing import Dict, List, Tuple
 from enum import Enum
 
-from liqi import LiqiProto, MsgType
+from .liqi import LiqiProto, MsgType
 
 PRINT_LOG = True  # whether print args when enter handler
 
@@ -147,6 +147,7 @@ class MajsoulHandler:
             tile in all_tiles for tile in tiles))
         assert(leftTileCount == 69)
         assert(all(dora in all_tiles for dora in doras))
+        assert(len(doras)==1)
 
     @dump_args
     def discardTile(self, seat: int, tile: str, operation):

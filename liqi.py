@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #捕获websocket数据并解析雀魂"动作"语义为Json
+import os
 import time
 import json
 import struct
@@ -8,8 +9,9 @@ from xmlrpc.client import ServerProxy
 import base64
 from enum import Enum
 
-import proto.liqi_pb2 as pb
 from google.protobuf.json_format import MessageToDict
+
+from .proto import liqi_pb2 as pb
 
 
 class MsgType(Enum):
@@ -17,13 +19,13 @@ class MsgType(Enum):
     Req = 2
     Res = 3
 
-
 class LiqiProto:
     #解析一局的WS消息队列
     tot = 0  # 当前总共解析的包数量
     # (method_name:str,pb.MethodObj) for 256 sliding windows; req->res
     res_type = dict() # int -> (method_name,pb2obj)
-    jsonProto = json.load(open('proto/liqi.json', 'r'))
+    
+    jsonProto = json.load(open(os.path.join(os.path.dirname(__file__), 'proto\liqi.json'), 'r'))
 
     def parse(self, flow_msg) -> bool:
         #parse一帧WS flow msg，要求按顺序parse
@@ -139,12 +141,14 @@ def dumpWebSocket():
                 #      "]: decode the packet here: %r…" % packet)
                 tot += 1
             history_msg = history_msg+flow
-            pickle.dump(history_msg, open('websocket_frames.pkl', 'wb'))
+            path=os.path.join(os.path.dirname(__file__), 'websocket_frames.pkl')
+            pickle.dump(history_msg, open(path, 'wb'))
         time.sleep(0.2)
 
 
 def replayWebSocket():
-    history_msg = pickle.load(open('websocket_frames.pkl', 'rb'))
+    path=os.path.join(os.path.dirname(__file__), 'websocket_frames.pkl')
+    history_msg = pickle.load(open(path, 'rb'))
     liqi = LiqiProto()
     for flow_msg in history_msg:
         result = liqi.parse(flow_msg)
