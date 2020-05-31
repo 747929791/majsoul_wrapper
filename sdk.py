@@ -18,12 +18,6 @@ all_tiles = set([str(i)+j for j in ('m', 'p', 's') for i in range(10)] +
                 [str(i)+'z' for i in range(1, 8)])
 
 
-class ChiPengGang(Enum):
-    Chi = 0
-    Peng = 1
-    Gang = 2
-
-
 class Operation(Enum):
     Discard = 1
     Chi = 2
@@ -89,12 +83,14 @@ class MajsoulHandler:
                 elif action_name == 'ActionNewRound':
                     # 初始手牌
                     data = liqi_dict['data']['data']
+                    ju = data.get('ju', 0)
+                    ben = data.get('ben', 0)
                     tiles = data['tiles']
                     scores = data['scores']
                     leftTileCount = data.get('leftTileCount', 0)
                     assert(len(data['doras']) == 1)
                     doras = data['doras']
-                    return self.newRound(tiles, scores, leftTileCount, doras)
+                    return self.newRound(ju, ben, tiles, scores, leftTileCount, doras)
                 elif action_name == 'ActionDiscardTile':
                     # 他家出牌
                     data = liqi_dict['data']['data']
@@ -137,12 +133,15 @@ class MajsoulHandler:
         assert(len(seatList) == 4)
 
     @dump_args
-    def newRound(self, tiles: List[str], scores: List[int], leftTileCount: int, doras: List[str]):
+    def newRound(self, ju: int, ben: int, tiles: List[str], scores: List[int], leftTileCount: int, doras: List[str]):
         """
+        ju:当前第几局(0:东1局,3:东4局，连庄不变，TODO:南)
+        TODO:流局立直棒数量(画面左上角一个红点的棒)
+        ben:连装棒数量(画面左上角八个黑点的棒)
         tiles:我的初始手牌
         scores:当前场上四个玩家的剩余分数(从东家开始顺序)
         leftTileCount:剩余牌数
-        dora:宝牌
+        doras:宝牌列表
         """
         assert(len(tiles) in (13, 14) and all(
             tile in all_tiles for tile in tiles))
@@ -200,10 +199,10 @@ class MajsoulHandler:
         assert(all(0 <= i < 4 for i in froms))
 
 
-def dumpWebSocket():
+def dumpWebSocket(handler: MajsoulHandler):
+    # 监听mitmproxy当前websocket，将所有报文按顺序交由handler.parse
     server = ServerProxy("http://localhost:8888")  # 初始化服务器
     liqi = LiqiProto()
-    handler = MajsoulHandler()
     tot = 0
     history_msg = []
     while True:
@@ -219,15 +218,16 @@ def dumpWebSocket():
         time.sleep(0.2)
 
 
-def replayWebSocket():
+def replayWebSocket(handler: MajsoulHandler):
+    # 回放历史websocket报文，按顺序交由handler.parse
     history_msg = pickle.load(open('websocket_frames.pkl', 'rb'))
     liqi = LiqiProto()
-    handler = MajsoulHandler()
     for flow_msg in history_msg:
         result = liqi.parse(flow_msg)
         handler.parse(result)
 
 
 if __name__ == '__main__':
-    #dumpWebSocket()
-    replayWebSocket()
+    handler = MajsoulHandler()
+    #dumpWebSocket(handler)
+    replayWebSocket(handler)
