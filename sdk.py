@@ -96,8 +96,9 @@ class MajsoulHandler:
                     data = liqi_dict['data']['data']
                     seat = data.get('seat', 0)
                     tile = data['tile']
+                    moqie = data.get('moqie', False)
                     operation = data.get('operation', None)
-                    return self.discardTile(seat, tile, operation)
+                    return self.discardTile(seat, tile, moqie, operation)
                 elif action_name == 'ActionDealTile':
                     data = liqi_dict['data']['data']
                     seat = data.get('seat', 0)
@@ -124,6 +125,8 @@ class MajsoulHandler:
         # mismatch
         print('unknown', liqi_dict)
 
+    #-------------------------Majsoul回调函数-------------------------
+
     @dump_args
     def authGame(self, accountId: int, seatList: List[int]):
         """
@@ -147,13 +150,14 @@ class MajsoulHandler:
             tile in all_tiles for tile in tiles))
         assert(leftTileCount == 69)
         assert(all(dora in all_tiles for dora in doras))
-        assert(len(doras)==1)
+        assert(len(doras) == 1)
 
     @dump_args
-    def discardTile(self, seat: int, tile: str, operation):
+    def discardTile(self, seat: int, tile: str, moqie: bool, operation):
         """
         seat:打牌的玩家
         tile:打出的手牌
+        moqie:是否是摸切
         operation:可选动作(吃碰杠)
         """
 
@@ -198,6 +202,16 @@ class MajsoulHandler:
         assert(0 <= seat < 4)
         assert(all(tile in all_tiles for tile in tiles))
         assert(all(0 <= i < 4 for i in froms))
+
+    #-------------------------Majsoul动作函数-------------------------
+
+    @dump_args
+    def actionDiscardTile(self, tile: str):
+        """
+        tile:要打的手牌
+        """
+        assert(tile in all_tiles)
+        print('discard:', tile)
 
 
 def dumpWebSocket(handler: MajsoulHandler):
