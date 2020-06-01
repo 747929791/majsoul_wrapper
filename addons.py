@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #监听websocket，通过xmlrpc为其他程序提供抓包服务
+import os
 from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 import threading
@@ -14,8 +15,8 @@ import mitmproxy.websocket
 import mitmproxy.proxy.protocol
 from xmlrpc.server import SimpleXMLRPCServer
 
-flow_queue = []
-
+activated_flows = [] # store all flow.id ([-1] is the recently opened)
+messages_dict = dict() # flow.id -> List[flow_msg]
 
 class ClientWebSocket:
 
@@ -37,6 +38,7 @@ class ClientWebSocket:
             attribute.
 
         """
+        print('[handshake websocket]:',flow,flow.__dict__,dir(flow))
 
     def websocket_start(self, flow: mitmproxy.websocket.WebSocketFlow):
         """
@@ -44,6 +46,10 @@ class ClientWebSocket:
             A websocket connection has commenced.
 
         """
+        print('[new websocket]:',flow,flow.__dict__,dir(flow))
+        global activated_flows,messages_dict
+        activated_flows.append(flow.id)
+        messages_dict[flow.id]=flow.messages
 
     def websocket_message(self, flow: mitmproxy.websocket.WebSocketFlow):
         """
@@ -57,13 +63,11 @@ class ClientWebSocket:
             messages, corresponding to the BINARY and TEXT frame types.
 
         """
-        global flow_queue
-        flow_queue = flow.messages
-        flow_msg = flow_queue[-1]
+        flow_msg = flow.messages[-1]
         packet = flow_msg.content
         from_client = flow_msg.from_client
         print("[" + ("Sended" if from_client else "Reveived") +
-              "]: decode the packet here: %r…" % packet)
+              "] from '"+flow.id+"': decode the packet here: %r…" % packet)
 
     def websocket_error(self, flow: mitmproxy.websocket.WebSocketFlow):
         """
@@ -80,7 +84,10 @@ class ClientWebSocket:
             A websocket connection has ended.
 
         """
-
+        print('[end websocket]:',flow,flow.__dict__,dir(flow))
+        global activated_flows,messages_dict
+        activated_flows.remove(flow.id)
+        messages_dict.pop(flow.id)
 
 addons = [
     ClientWebSocket()
@@ -90,18 +97,21 @@ addons = [
 
 
 def get_len() -> int:
-    global flow_queue
-    return len(flow_queue)
+    global activated_flows,messages_dict
+    L=messages_dict[activated_flows[-1]]
+    return len(L)
 
 
 def get_item(id: int):
-    global flow_queue
-    return pickle.dumps(flow_queue[id])
+    global activated_flows,messages_dict
+    L=messages_dict[activated_flows[-1]]
+    return pickle.dumps(L[id])
 
 
 def get_items(from_: int, to_: int):
-    global flow_queue
-    return pickle.dumps(flow_queue[from_:to_:])
+    global activated_flows,messages_dict
+    L=messages_dict[activated_flows[-1]]
+    return pickle.dumps(L[from_:to_:])
 
 
 def RPC_init():
@@ -122,3 +132,10 @@ chrome_options.add_argument('--proxy-server=127.0.0.1:8080')
 chrome_options.add_argument('--ignore-certificate-errors')
 browser = webdriver.Chrome(chrome_options=chrome_options)
 #browser.get('https://www.majsoul.com/1/')
+
+if __name__=='__main__':
+    #回放websocket流量
+    replay_path=os.path.join(os.path.dirname(__file__), 'websocket_frames.pkl')
+    history_msg = pickle.load(open(replay_path, 'rb'))
+    activated_flows = ['fake_id']
+    messages_dict = {'fake_id':history_msg}

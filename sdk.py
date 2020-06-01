@@ -22,7 +22,9 @@ class Operation(Enum):
     Discard = 1
     Chi = 2
     Peng = 3
+    MingGang = 5
     JiaGang = 6
+    Liqi = 7
     Hu = 9
 
 
@@ -113,13 +115,13 @@ class MajsoulHandler:
                         return self.dealTile(seat, leftTileCount)
                 elif action_name == 'ActionChiPengGang':
                     # 吃碰杠
-                    pass
-                    """data=liqi_dict['data']['data']
-                    seat=data.get('seat',0)
-                    tiles=data['tiles']
-                    froms=data['froms']
-                    tileStates=data['tileStates']
-                    return self.chiPengGang(seat,tiles,froms,tileStates)"""
+                    data = liqi_dict['data']['data']
+                    type_ = data.get('type', 0)
+                    seat = data.get('seat', 0)
+                    tiles = data['tiles']
+                    froms = data['froms']
+                    tileStates = data['tileStates']
+                    return self.chiPengGang(type_, seat, tiles, froms, tileStates)
         elif method in self.no_effect_method:
             return
         # mismatch
@@ -189,8 +191,9 @@ class MajsoulHandler:
         assert(tile in all_tiles)
 
     @dump_args
-    def chiPengGang(self, seat: int, tiles: List[str], froms: List[int], tileStates: List[int]):
+    def chiPengGang(self, type_: int, seat: int, tiles: List[str], froms: List[int], tileStates: List[int]):
         """
+        type_:操作类型
         seat:吃碰杠的玩家
         tiles:吃碰杠牌组
         froms:每张牌来自哪个玩家
@@ -202,6 +205,19 @@ class MajsoulHandler:
         assert(0 <= seat < 4)
         assert(all(tile in all_tiles for tile in tiles))
         assert(all(0 <= i < 4 for i in froms))
+        if type_ == 0:      # 吃
+            assert(len(tiles) == 3)
+            assert(tiles[0] != tiles[1] != tiles[2])
+        elif type_ == 1:    # 碰
+            assert(len(tiles) == 3)
+            assert(tiles[0] == tiles[1] == tiles[2] or all(
+                i[0] in ('0', '5') for i in tiles))
+        elif type_ == 2:    # 明杠
+            assert(len(tiles) == 4)
+            assert(tiles[0] == tiles[1] == tiles[2] == tiles[2] or all(
+                i[0] in ('0', '5') for i in tiles))
+        else:
+            raise NotImplementedError
 
     #-------------------------Majsoul动作函数-------------------------
 
@@ -213,10 +229,18 @@ class MajsoulHandler:
         assert(tile in all_tiles)
         print('discard:', tile)
 
+    @dump_args
+    def actionLiqi(self, tile: str):
+        """
+        tile:立直要打的手牌
+        """
+        assert(tile in all_tiles)
+        print('liqi:', tile)
+
 
 def dumpWebSocket(handler: MajsoulHandler):
     # 监听mitmproxy当前websocket，将所有报文按顺序交由handler.parse
-    server = ServerProxy("http://localhost:8888")  # 初始化服务器
+    server = ServerProxy("http://127.0.0.1:8888")  # 初始化服务器
     liqi = LiqiProto()
     tot = 0
     history_msg = []
