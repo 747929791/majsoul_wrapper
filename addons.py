@@ -115,7 +115,7 @@ def get_items(from_: int, to_: int):
 
 
 def RPC_init():
-    server = SimpleXMLRPCServer(('localhost', 8888))
+    server = SimpleXMLRPCServer(('localhost', 37247))
     server.register_function(get_len, "get_len")
     server.register_function(get_item, "get_item")
     server.register_function(get_items, "get_items")

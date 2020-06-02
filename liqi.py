@@ -123,7 +123,7 @@ def analysis_protobuf(buf):
 
 
 def dumpWebSocket():
-    server = ServerProxy("http://127.0.0.1:8888")  # 初始化服务器
+    server = ServerProxy("http://127.0.0.1:37247")  # 初始化服务器
     liqi = LiqiProto()
     tot = 0
     history_msg = []
