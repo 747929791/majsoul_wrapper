@@ -67,18 +67,23 @@ class MajsoulHandler:
         'ActionMJStart',                        # 通知麻将开始
     }
 
+    isMajsoulReady = False                   # Majsoul是否处于对局中
+
     def parse(self, liqi_dict):
         method = liqi_dict['method']
         if method == '.lq.FastTest.authGame':
             if liqi_dict['type'] == MsgType.Req:
                 # 初次进入游戏，请求对局信息
                 self.accountId = liqi_dict['data']['accountId']
+                self.beginGame()
                 return
             if liqi_dict['type'] == MsgType.Res:
                 # 初次进入游戏，对局信息回复
                 self.seatList = liqi_dict['data']['seatList']
                 self.mySeat = self.seatList.index(self.accountId)
                 return self.authGame(self.accountId, self.seatList)
+        elif method == '.lq.NotifyGameEndResult':
+            self.endGame()
         elif method == '.lq.ActionPrototype':
             if 'name' in liqi_dict['data']:
                 action_name = liqi_dict['data']['name']
@@ -100,14 +105,14 @@ class MajsoulHandler:
                     data = liqi_dict['data']['data']
                     seat = data.get('seat', 0)
                     tile = data['tile']
-                    isLiqi=data.get('isLiqi',False)
+                    isLiqi = data.get('isLiqi', False)
                     moqie = data.get('moqie', False)
                     operation = data.get('operation', None)
                     return self.discardTile(seat, tile, moqie, isLiqi, operation)
                 elif action_name == 'ActionDealTile':
                     data = liqi_dict['data']['data']
                     seat = data.get('seat', 0)
-                    liqi = data.get('liqi',None)
+                    liqi = data.get('liqi', None)
                     leftTileCount = data.get('leftTileCount', 0)
                     if 'tile' in data:
                         #自家摸牌
@@ -126,6 +131,43 @@ class MajsoulHandler:
                     froms = data['froms']
                     tileStates = data['tileStates']
                     return self.chiPengGang(type_, seat, tiles, froms, tileStates)
+                elif action_name == 'ActionHule':
+                    # 胡了
+                    data = liqi_dict['data']['data']
+                    info = data['hules']
+                    assert(len(info) == 1)
+                    info = info[0]
+                    hand = info['hand']
+                    huTile = info['huTile']
+                    seat = info.get('seat', 0)
+                    zimo = info.get('zimo', False)
+                    liqi = info.get('liqi', False)
+                    doras = info['doras']
+                    liDoras = info.get('liDoras', [])
+                    fan = info['count']
+                    fu = info['fu']
+                    oldScores = data['oldScores']
+                    deltaScores = data['deltaScores']
+                    newScores = data['scores']
+                    return self.hule(hand, huTile, seat, zimo, liqi, doras, liDoras, fan, fu, oldScores, deltaScores, newScores)
+                elif action_name == 'ActionNoTile':
+                    #流局
+                    data = liqi_dict['data']['data']
+                    import sys
+                    sys.stdout.flush()
+                    players = data['players']
+                    assert(len(players) == 4)
+                    tingpai = ['tingpai' in players[i] for i in range(4)]
+                    hands = [players[i]['hand'] if tingpai[i] else []
+                             for i in range(4)]
+                    scores = data['scores']
+                    assert(len(scores) == 1)
+                    scores = scores[0]
+                    oldScores = scores['oldScores']
+                    deltaScores = scores.get('deltaScores', [0, 0, 0, 0])
+                    return self.liuju(tingpai, hands, oldScores, deltaScores)
+                else:
+                    raise NotImplementedError
         elif method in self.no_effect_method:
             return
         # mismatch
@@ -159,7 +201,7 @@ class MajsoulHandler:
         assert(len(doras) == 1)
 
     @dump_args
-    def discardTile(self, seat: int, tile: str, moqie: bool, isLiqi:bool, operation):
+    def discardTile(self, seat: int, tile: str, moqie: bool, isLiqi: bool, operation):
         """
         seat:打牌的玩家
         tile:打出的手牌
@@ -173,26 +215,27 @@ class MajsoulHandler:
         #我胡了unknown {'id': 1458, 'type': <MsgType.Notify: 1>, 'method': '.lq.ActionPrototype', 'data': {'step': 96, 'name': 'ActionHule', 'data': {'hules': [{'hand': ['0m', '5m', '5m', '8m', '9m', '4p', '5p', '6p', '6s', '6s'], 'ming': ['kezi(7z,7z,7z)'], 'huTile': '7m', 'seat': 3, 'doras': ['9p'], 'count': 2, 'fans': [{'val': 1, 'id': 9}, {'val': 1, 'id': 32}], 'fu': 30, 'pointRong': 2000, 'pointZimoQin': 1000, 'pointZimoXian': 500, 'pointSum': 2000}], 'oldScores': [24000, 24000, 24000, 28000], 'deltaScores': [0, 0, -2300, 2300], 'scores': [24000, 24000, 21700, 30300]}}}
         assert(0 <= seat < 4)
         assert(tile in all_tiles)
-        if operation!=None:
-            assert(operation['seat']==self.mySeat)
-            opList=operation.get('operationList',[])
-            canChi=any(op['type']==Operation.Chi.value for op in opList)
-            canPeng=any(op['type']==Operation.Peng.value for op in opList)
-            canGang=any(op['type']==Operation.MingGang.value for op in opList)
-            canHu=any(op['type']==Operation.Hu.value for op in opList)
+        if operation != None:
+            assert(operation['seat'] == self.mySeat)
+            opList = operation.get('operationList', [])
+            canChi = any(op['type'] == Operation.Chi.value for op in opList)
+            canPeng = any(op['type'] == Operation.Peng.value for op in opList)
+            canGang = any(
+                op['type'] == Operation.MingGang.value for op in opList)
+            canHu = any(op['type'] == Operation.Hu.value for op in opList)
 
     @dump_args
-    def dealTile(self, seat: int, leftTileCount: int, liqi:Dict):
+    def dealTile(self, seat: int, leftTileCount: int, liqi: Dict):
         """
         seat:摸牌的玩家
         leftTileCount:剩余牌数
         liqi:如果上一回合玩家出牌立直，则紧接着的摸牌阶段有此参数表示立直成功
         """
         assert(0 <= seat < 4)
-        assert(type(liqi)==dict or liqi==None)
+        assert(type(liqi) == dict or liqi == None)
 
     @dump_args
-    def iDealTile(self, seat: int, tile: str, leftTileCount: int, liqi:Dict, operation: Dict):
+    def iDealTile(self, seat: int, tile: str, leftTileCount: int, liqi: Dict, operation: Dict):
         """
         seat:我自己
         tile:摸到的牌
@@ -203,11 +246,11 @@ class MajsoulHandler:
         #iDealTile (seat = 3, tile = '3m', leftTileCount = 25, operation = {'seat': 3, 'operationList': [{'type': 1}, {'type': 6, 'combination': ['3m|3m|3m|3m']}], 'timeFixed': 60000}) 自摸加杠3m
         assert(seat == self.mySeat)
         assert(tile in all_tiles)
-        assert(type(liqi)==dict or liqi==None)
-        if operation!=None:
-            assert(operation['seat']==self.mySeat)
-            opList=operation.get('operationList',[])
-            canLiqi=any(op['type']==7 for op in opList)
+        assert(type(liqi) == dict or liqi == None)
+        if operation != None:
+            assert(operation['seat'] == self.mySeat)
+            opList = operation.get('operationList', [])
+            canLiqi = any(op['type'] == 7 for op in opList)
 
     @dump_args
     def chiPengGang(self, type_: int, seat: int, tiles: List[str], froms: List[int], tileStates: List[int]):
@@ -238,6 +281,48 @@ class MajsoulHandler:
         else:
             raise NotImplementedError
 
+    @dump_args
+    def hule(self, hand: List[str], huTile: str, seat: int, zimo: bool, liqi: bool, doras: List[str], liDoras: List[str], fan: int, fu: int, oldScores: List[int], deltaScores: List[int], newScores: List[int]):
+        """
+        hand:胡牌者手牌
+        huTile:点炮牌
+        seat:玩家座次
+        zimo:是否自摸
+        liqi:是否立直
+        doras:明宝牌列表
+        liDoras:里宝牌列表
+        fan:番数
+        fu:符数
+        oldScores:4人旧分
+        deltaScores::新分减旧分
+        newScores:4人新分
+        """
+        assert(all(tile in all_tiles for tile in hand))
+        assert(huTile in all_tiles)
+        assert(0 <= seat < 4)
+        assert(all(tile in all_tiles for tile in doras))
+        assert(all(tile in all_tiles for tile in liDoras))
+
+    @dump_args
+    def liuju(self, tingpai: List[bool], hands: List[List[str]], oldScores: List[int], deltaScores: List[int]):
+        """
+        tingpai:4个玩家是否停牌
+        hands:听牌玩家的手牌(没听为[])
+        oldScores:4人旧分
+        deltaScores::新分减旧分
+        """
+        assert(all(tile in all_tiles for hand in hands for tile in hand))
+
+    @dump_args
+    def beginGame(self):
+        #开始整场对局
+        self.isMajsoulReady = True
+
+    @dump_args
+    def endGame(self):
+        #结束整场对局
+        self.isMajsoulReady = False
+
     #-------------------------Majsoul动作函数-------------------------
 
     @dump_args
@@ -264,17 +349,17 @@ class MajsoulHandler:
         print('Hu!!!')
 
     @dump_args
-    def actionChiPengGang(self, type: Operation, tiles:List[str]):
+    def actionChiPengGang(self, type: Operation, tiles: List[str]):
         """
         type:操作类型
         """
-        if type==Operation.NoEffect:
+        if type == Operation.NoEffect:
             print('Do nothing')
-        elif type==Operation.Chi:
+        elif type == Operation.Chi:
             print('Chi')
-        elif type==Operation.Peng:
+        elif type == Operation.Peng:
             print('Peng')
-        elif type==Operation.Gang:
+        elif type == Operation.Gang:
             print('Gang')
 
 
