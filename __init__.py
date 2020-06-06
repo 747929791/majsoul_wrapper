@@ -4,4 +4,4 @@
 
 from .sdk import MajsoulHandler,Operation,all_tiles
 from .liqi import LiqiProto
-
+from .action.action import GUIInterface

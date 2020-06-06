@@ -19,13 +19,20 @@ class MsgType(Enum):
     Req = 2
     Res = 3
 
+
 class LiqiProto:
-    #解析一局的WS消息队列
-    tot = 0  # 当前总共解析的包数量
-    # (method_name:str,pb.MethodObj) for 256 sliding windows; req->res
-    res_type = dict() # int -> (method_name,pb2obj)
-    
-    jsonProto = json.load(open(os.path.join(os.path.dirname(__file__), 'proto\liqi.json'), 'r'))
+
+    def __init__(self):
+        #解析一局的WS消息队列
+        self.tot = 0  # 当前总共解析的包数量
+        # (method_name:str,pb.MethodObj) for 256 sliding windows; req->res
+        self.res_type = dict()  # int -> (method_name,pb2obj)
+        self.jsonProto = json.load(
+            open(os.path.join(os.path.dirname(__file__), 'proto\liqi.json'), 'r'))
+
+    def init(self):
+        self.tot = 0
+        self.res_type.clear()
 
     def parse(self, flow_msg) -> bool:
         #parse一帧WS flow msg，要求按顺序parse
@@ -61,7 +68,7 @@ class LiqiProto:
             {'id': 2, 'type': 'string','data': b'protobuf_bytes'}]
             """
             if msg_type == MsgType.Req:
-                assert(msg_id < 1<<16)
+                assert(msg_id < 1 << 16)
                 assert(len(msg_block) == 2)
                 assert(msg_id not in self.res_type)
                 method_name = msg_block[0]['data'].decode()
@@ -80,7 +87,7 @@ class LiqiProto:
                 dict_obj = MessageToDict(proto_obj)
         result = {'id': msg_id, 'type': msg_type,
                   'method': method_name, 'data': dict_obj}
-        self.tot+=1
+        self.tot += 1
         return result
 
 
@@ -141,13 +148,14 @@ def dumpWebSocket():
                 #      "]: decode the packet here: %r…" % packet)
                 tot += 1
             history_msg = history_msg+flow
-            path=os.path.join(os.path.dirname(__file__), 'websocket_frames.pkl')
+            path = os.path.join(os.path.dirname(
+                __file__), 'websocket_frames.pkl')
             pickle.dump(history_msg, open(path, 'wb'))
         time.sleep(0.2)
 
 
 def replayWebSocket():
-    path=os.path.join(os.path.dirname(__file__), 'websocket_frames.pkl')
+    path = os.path.join(os.path.dirname(__file__), 'websocket_frames.pkl')
     history_msg = pickle.load(open(path, 'rb'))
     liqi = LiqiProto()
     for flow_msg in history_msg:
