@@ -344,9 +344,16 @@ class MajsoulHandler:
     @dump_args
     def actionHu(self):
         """
-        胡牌了！
+        点炮了！
         """
         print('Hu!!!')
+
+    @dump_args
+    def actionZimo(self):
+        """
+        自摸了！
+        """
+        print('Zimo!!!')
 
     @dump_args
     def actionChiPengGang(self, type: Operation, tiles: List[str]):
@@ -359,7 +366,7 @@ class MajsoulHandler:
             print('Chi')
         elif type == Operation.Peng:
             print('Peng')
-        elif type == Operation.Gang:
+        elif type in (Operation.MingGang, Operation.JiaGang):
             print('Gang')
 
 

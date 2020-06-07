@@ -9,6 +9,7 @@ import pyautogui
 import numpy as np
 
 from .classifier import classify
+from ..sdk import Operation
 
 pyautogui.PAUSE = 0         # 函数执行后暂停时间
 pyautogui.FAILSAFE = True   # 开启鼠标移动到左上角自动退出
@@ -86,7 +87,7 @@ def ObjectLocalization(objImg: np.ndarray, targetImg: np.ndarray) -> np.ndarray:
         cv2.imshow('ORB match', img3)
         cv2.waitKey(1)
     # Homography
-    MIN_MATCH_COUNT = 100
+    MIN_MATCH_COUNT = 50
     if len(good) > MIN_MATCH_COUNT:
         src_pts = np.float32(
             [kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
@@ -155,7 +156,15 @@ class GUIInterface:
         # load template imgs
         join = os.path.join
         root = os.path.dirname(__file__)
-        self.menuImg = cv2.imread(join(root, 'template/menu.png'))     # 初始菜单界面
+        def load(name): return cv2.imread(join(root, 'template', name))
+        self.menuImg = load('menu.png')         # 初始菜单界面
+        self.chiImg = load('chi.png')
+        self.pengImg = load('peng.png')
+        self.gangImg = load('gang.png')
+        self.huImg = load('hu.png')
+        self.zimoImg = load('zimo.png')
+        self.tiaoguoImg = load('tiaoguo.png')
+        self.liqiImg = load('liqi.png')
 
     def actionDiscardTile(self, tile: str):
         print('in actionDiscardTile')
@@ -168,18 +177,41 @@ class GUIInterface:
                 pyautogui.click(x=x, y=y, button='left')
                 time.sleep(0.1)
                 # out of screen
-                pyautogui.moveRel(xOffset=0, yOffset=-
-                                  Layout.tileSize[1], duration=0.2)
+                pyautogui.moveTo(x=self.waitPos[0], y=self.waitPos[1])
                 return True
         raise Exception(
             'GUIInterface.discardTile tile not found. L:', L, 'tile:', tile)
         return False
 
+    def actionChiPengGang(self, type: Operation, tiles: List[str]):
+        if type == Operation.NoEffect:
+            self.clickButton(self.tiaoguoImg)
+        elif type == Operation.Chi:
+            self.clickButton(self.chiImg)
+        elif type == Operation.Peng:
+            self.clickButton(self.pengImg)
+        elif type in (Operation.MingGang, Operation.JiaGang):
+            self.clickButton(self.gangImg)
+
+    def actionLiqi(self, tile: str):
+        self.clickButton(self.liqiImg)
+        time.sleep(0.2)
+        self.actionDiscardTile(tile)
+
+    def actionHu(self):
+        self.clickButton(self.huImg)
+
+    def actionZimo(self):
+        self.clickButton(self.zimoImg)
+
     def calibrateMenu(self):
         # if the browser is on the initial menu, set self.M and return to True
         # if not return False
         self.M = getHomographyMatrix(self.menuImg, screenShot(), threshold=0.5)
-        return type(self.M) != type(None)
+        result = type(self.M) != type(None)
+        if result:
+            self.waitPos = np.int32(PosTransfer([100, 100], self.M))
+        return result
 
     def _getHandTiles(self) -> List[Tuple[str, Tuple[int, int]]]:
         # return a list of my tiles' position
@@ -189,10 +221,10 @@ class GUIInterface:
         img = screen_img.copy()     # for calculation
         start = np.int32(PosTransfer([235, 1002], self.M))
         O = PosTransfer([0, 0], self.M)
-        colorThreshold = 200
+        colorThreshold = 110
         tileThreshold = np.int32(0.7*(PosTransfer(Layout.tileSize, self.M)-O))
         fail = 0
-        maxFail = np.int32(PosTransfer([60, 0], self.M)-O)[0]
+        maxFail = np.int32(PosTransfer([100, 0], self.M)-O)[0]
         i = 0
         while fail < maxFail:
             x, y = start[0]+i, start[1]
@@ -212,3 +244,24 @@ class GUIInterface:
                 fail += 1
             i += 1
         return result
+
+    def clickButton(self, buttonImg):
+        x0, y0 = np.int32(PosTransfer([0, 0], self.M))
+        x1, y1 = np.int32(PosTransfer(Layout.size, self.M))
+        zoom = (x1-x0)/Layout.size[0]
+        n, m, _ = buttonImg.shape
+        n = int(n*zoom)
+        m = int(m*zoom)
+        templ = cv2.resize(buttonImg, (m, n))
+        x0, y0 = np.int32(PosTransfer([595, 557], self.M))
+        x1, y1 = np.int32(PosTransfer([1508, 912], self.M))
+        img = screenShot()[y0:y1, x0:x1, :]
+        T = cv2.matchTemplate(img, templ, cv2.TM_SQDIFF, mask=templ)
+        _, _, (x, y), _ = cv2.minMaxLoc(T)
+        if DEBUG:
+            T = np.exp((1-T/T.max())*10)
+            T = T/T.max()
+            cv2.imshow('T', T)
+            cv2.waitKey(0)
+        pyautogui.click(x=x+x0+m//2, y=y+y0+n//2, duration=0.2)
+        pyautogui.moveTo(x=self.waitPos[0], y=self.waitPos[1])

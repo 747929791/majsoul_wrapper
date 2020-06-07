@@ -100,3 +100,6 @@ def classify(img: np.ndarray):
         TileID = predicted[0]
         TileName = classes[TileID.item()]
     return TileName
+
+
+classify(np.ones((32, 32, 3), dtype=np.uint8))  # load cache
