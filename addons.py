@@ -15,8 +15,11 @@ import mitmproxy.websocket
 import mitmproxy.proxy.protocol
 from xmlrpc.server import SimpleXMLRPCServer
 
+from liqi import tamperUsetime,LiqiProto
+
 activated_flows = [] # store all flow.id ([-1] is the recently opened)
 messages_dict = dict() # flow.id -> List[flow_msg]
+liqi = LiqiProto()
 
 class ClientWebSocket:
 
@@ -64,6 +67,13 @@ class ClientWebSocket:
 
         """
         flow_msg = flow.messages[-1]
+        
+        # This is cheating, extending the time limit to 7 seconds
+        #tamperUsetime(flow_msg)
+        #result = liqi.parse(flow_msg)
+        #print(result)
+        #print('-'*65)
+
         packet = flow_msg.content
         from_client = flow_msg.from_client
         print("[" + ("Sended" if from_client else "Reveived") +

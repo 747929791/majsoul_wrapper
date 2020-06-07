@@ -166,6 +166,11 @@ class MajsoulHandler:
                     oldScores = scores['oldScores']
                     deltaScores = scores.get('deltaScores', [0, 0, 0, 0])
                     return self.liuju(tingpai, hands, oldScores, deltaScores)
+                elif action_name == 'ActionAnGangAddGang':
+                    data = liqi_dict['data']['data']
+                    tile = data['tiles']
+                    type_ = data['type']
+                    raise NotImplementedError
                 else:
                     raise NotImplementedError
         elif method in self.no_effect_method:
