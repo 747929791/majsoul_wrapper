@@ -278,10 +278,9 @@ def replayWebSocket():
     history_msg = pickle.load(open(path, 'rb'))
     liqi = LiqiProto()
     for flow_msg in history_msg:
-        if tamperUsetime(flow_msg):
-            result = liqi.parse(flow_msg)
-            print(result)
-            print('-'*65)
+        result = liqi.parse(flow_msg)
+        print(result)
+        print('-'*65)
 
 
 if __name__ == '__main__':

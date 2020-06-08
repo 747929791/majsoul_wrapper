@@ -107,8 +107,9 @@ class MajsoulHandler:
                     tile = data['tile']
                     isLiqi = data.get('isLiqi', False)
                     moqie = data.get('moqie', False)
+                    doras = data.get('doras', [])
                     operation = data.get('operation', None)
-                    return self.discardTile(seat, tile, moqie, isLiqi, operation)
+                    return self.discardTile(seat, tile, moqie, isLiqi, doras, operation)
                 elif action_name == 'ActionDealTile':
                     data = liqi_dict['data']['data']
                     seat = data.get('seat', 0)
@@ -168,9 +169,10 @@ class MajsoulHandler:
                     return self.liuju(tingpai, hands, oldScores, deltaScores)
                 elif action_name == 'ActionAnGangAddGang':
                     data = liqi_dict['data']['data']
-                    tile = data['tiles']
                     type_ = data['type']
-                    raise NotImplementedError
+                    seat = data.get('seat', 0)
+                    tiles = data['tiles']
+                    return self.anGangAddGang(type_, seat, tiles)
                 else:
                     raise NotImplementedError
         elif method in self.no_effect_method:
@@ -206,12 +208,13 @@ class MajsoulHandler:
         assert(len(doras) == 1)
 
     @dump_args
-    def discardTile(self, seat: int, tile: str, moqie: bool, isLiqi: bool, operation):
+    def discardTile(self, seat: int, tile: str, moqie: bool, isLiqi: bool, doras: List[str], operation):
         """
         seat:打牌的玩家
         tile:打出的手牌
         moqie:是否是摸切
         isLiqi:当回合是否出牌后立直
+        doras:上一家杠牌后记录所有明宝牌(其余时刻为[])
         operation:可选动作(吃碰杠)
         """
 
@@ -283,6 +286,20 @@ class MajsoulHandler:
             assert(len(tiles) == 4)
             assert(tiles[0] == tiles[1] == tiles[2] == tiles[2] or all(
                 i[0] in ('0', '5') for i in tiles))
+        else:
+            raise NotImplementedError
+
+    @dump_args
+    def anGangAddGang(self, type_: int, seat: int, tiles: str):
+        """
+        type_:操作类型
+        seat:杠的玩家
+        tiles:杠的牌
+        """
+        if type_ == 2:
+            #自己加杠
+            assert(seat == self.mySeat)
+            assert(tiles in all_tiles)
         else:
             raise NotImplementedError
 
