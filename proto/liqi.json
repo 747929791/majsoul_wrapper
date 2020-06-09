@@ -249,6 +249,24 @@
                         }
                     }
                 },
+                "NotifyActivityPeriodTaskUpdate": {
+                    "fields": {
+                        "progresses": {
+                            "rule": "repeated",
+                            "type": "TaskProgress",
+                            "id": 1
+                        }
+                    }
+                },
+                "NotifyAccountRandomTaskUpdate": {
+                    "fields": {
+                        "progresses": {
+                            "rule": "repeated",
+                            "type": "TaskProgress",
+                            "id": 1
+                        }
+                    }
+                },
                 "NotifyNewComment": {
                     "fields": {}
                 },
@@ -320,6 +338,33 @@
                         "goods_id": {
                             "type": "uint32",
                             "id": 3
+                        },
+                        "new_month_ticket": {
+                            "type": "uint32",
+                            "id": 4
+                        },
+                        "resource_modify": {
+                            "rule": "repeated",
+                            "type": "ResourceModify",
+                            "id": 5
+                        }
+                    },
+                    "nested": {
+                        "ResourceModify": {
+                            "fields": {
+                                "id": {
+                                    "type": "uint32",
+                                    "id": 1
+                                },
+                                "count": {
+                                    "type": "uint32",
+                                    "id": 2
+                                },
+                                "final": {
+                                    "type": "uint32",
+                                    "id": 3
+                                }
+                            }
                         }
                     }
                 },
@@ -854,12 +899,20 @@
                             "id": 8
                         },
                         "activity_task": {
-                            "type": "ActivityTaskUpdate",
+                            "type": "TaskUpdate",
                             "id": 9
                         },
                         "activity_flip_task": {
-                            "type": "ActivityFlipTaskUpdate",
+                            "type": "TaskUpdate",
                             "id": 10
+                        },
+                        "activity_period_task": {
+                            "type": "TaskUpdate",
+                            "id": 11
+                        },
+                        "activity_random_task": {
+                            "type": "TaskUpdate",
+                            "id": 12
                         }
                     },
                     "nested": {
@@ -886,6 +939,16 @@
                                     "rule": "repeated",
                                     "type": "uint32",
                                     "id": 3
+                                },
+                                "finished_endings": {
+                                    "rule": "repeated",
+                                    "type": "uint32",
+                                    "id": 4
+                                },
+                                "rewarded_endings": {
+                                    "rule": "repeated",
+                                    "type": "uint32",
+                                    "id": 5
                                 }
                             }
                         },
@@ -913,19 +976,15 @@
                                     "rule": "repeated",
                                     "type": "uint32",
                                     "id": 1
-                                }
-                            }
-                        },
-                        "ActivityTaskUpdate": {
-                            "fields": {
-                                "progresses": {
+                                },
+                                "remove_titles": {
                                     "rule": "repeated",
-                                    "type": "TaskProgress",
-                                    "id": 1
+                                    "type": "uint32",
+                                    "id": 2
                                 }
                             }
                         },
-                        "ActivityFlipTaskUpdate": {
+                        "TaskUpdate": {
                             "fields": {
                                 "progresses": {
                                     "rule": "repeated",
@@ -1033,6 +1092,10 @@
                         "ban_deadline": {
                             "type": "uint32",
                             "id": 16
+                        },
+                        "comment_ban": {
+                            "type": "uint32",
+                            "id": 17
                         }
                     }
                 },
@@ -1338,6 +1401,10 @@
                         "muyu_mode": {
                             "type": "uint32",
                             "id": 46
+                        },
+                        "open_hand": {
+                            "type": "uint32",
+                            "id": 47
                         }
                     }
                 },
@@ -2114,6 +2181,10 @@
                         "content": {
                             "type": "string",
                             "id": 4
+                        },
+                        "is_banned": {
+                            "type": "uint32",
+                            "id": 5
                         }
                     }
                 },
@@ -2459,6 +2530,10 @@
                         "consume_count": {
                             "type": "uint32",
                             "id": 3
+                        },
+                        "modify_count": {
+                            "type": "int32",
+                            "id": 4
                         }
                     }
                 },
@@ -2611,6 +2686,10 @@
                         "private_notice": {
                             "type": "string",
                             "id": 12
+                        },
+                        "observer_switch": {
+                            "type": "uint32",
+                            "id": 13
                         }
                     }
                 },
@@ -3412,6 +3491,10 @@
                             "requestType": "ReqOauth2Login",
                             "responseType": "ResLogin"
                         },
+                        "dmmPreLogin": {
+                            "requestType": "ReqDMMPreLogin",
+                            "responseType": "ResDMMPreLogin"
+                        },
                         "createPhoneVerifyCode": {
                             "requestType": "ReqCreatePhoneVerifyCode",
                             "responseType": "ResCommon"
@@ -3772,14 +3855,6 @@
                             "requestType": "ReqPlatformBillingProducts",
                             "responseType": "ResPlatformBillingProducts"
                         },
-                        "createBillingOrder": {
-                            "requestType": "ReqCreateBillingOrder",
-                            "responseType": "ResCreateBillingOrder"
-                        },
-                        "solveGooglePlayOrder": {
-                            "requestType": "ReqSolveGooglePlayOrder",
-                            "responseType": "ResCommon"
-                        },
                         "cancelGooglePlayOrder": {
                             "requestType": "ReqCancelGooglePlayOrder",
                             "responseType": "ResCommon"
@@ -3855,6 +3930,14 @@
                         "upgradeCharacter": {
                             "requestType": "ReqUpgradeCharacter",
                             "responseType": "ResUpgradeCharacter"
+                        },
+                        "addFinishedEnding": {
+                            "requestType": "ReqFinishedEnding",
+                            "responseType": "ResCommon"
+                        },
+                        "receiveEndingReward": {
+                            "requestType": "ReqFinishedEnding",
+                            "responseType": "ResCommon"
                         },
                         "gameMasterCommand": {
                             "requestType": "ReqGMCommand",
@@ -3976,9 +4059,25 @@
                             "requestType": "ReqCreateENAlipayOrder",
                             "responseType": "ResCreateENAlipayOrder"
                         },
+                        "createDMMOrder": {
+                            "requestType": "ReqCreateDMMOrder",
+                            "responseType": "ResCreateDmmOrder"
+                        },
                         "createIAPOrder": {
                             "requestType": "ReqCreateIAPOrder",
                             "responseType": "ResCreateIAPOrder"
+                        },
+                        "createMyCardAndroidOrder": {
+                            "requestType": "ReqCreateMyCardOrder",
+                            "responseType": "ResCreateMyCardOrder"
+                        },
+                        "createMyCardWebOrder": {
+                            "requestType": "ReqCreateMyCardOrder",
+                            "responseType": "ResCreateMyCardOrder"
+                        },
+                        "verifyMyCardOrder": {
+                            "requestType": "ReqVerifyMyCardOrder",
+                            "responseType": "ResCommon"
                         },
                         "verificationIAPOrder": {
                             "requestType": "ReqVerificationIAPOrder",
@@ -3987,6 +4086,18 @@
                         "createYostarSDKOrder": {
                             "requestType": "ReqCreateYostarOrder",
                             "responseType": "ResCreateYostarOrder"
+                        },
+                        "createBillingOrder": {
+                            "requestType": "ReqCreateBillingOrder",
+                            "responseType": "ResCreateBillingOrder"
+                        },
+                        "solveGooglePlayOrder": {
+                            "requestType": "ReqSolveGooglePlayOrder",
+                            "responseType": "ResCommon"
+                        },
+                        "solveGooglePayOrderV3": {
+                            "requestType": "ReqSolveGooglePlayOrderV3",
+                            "responseType": "ResCommon"
                         },
                         "fetchMisc": {
                             "requestType": "ReqCommon",
@@ -4019,6 +4130,10 @@
                         "fetchCustomizedContestExtendInfo": {
                             "requestType": "ReqFetchCustomizedContestExtendInfo",
                             "responseType": "ResFetchCustomizedContestExtendInfo"
+                        },
+                        "fetchCustomizedContestAuthInfo": {
+                            "requestType": "ReqFetchCustomizedContestAuthInfo",
+                            "responseType": "ResFetchCustomizedContestAuthInfo"
                         },
                         "enterCustomizedContest": {
                             "requestType": "ReqEnterCustomizedContest",
@@ -4092,6 +4207,14 @@
                             "requestType": "ReqCompleteActivityTask",
                             "responseType": "ResCommon"
                         },
+                        "completePeriodActivityTask": {
+                            "requestType": "ReqCompleteActivityTask",
+                            "responseType": "ResCommon"
+                        },
+                        "completeRandomActivityTask": {
+                            "requestType": "ReqCompleteActivityTask",
+                            "responseType": "ResCommon"
+                        },
                         "receiveActivityFlipTask": {
                             "requestType": "ReqReceiveActivityFlipTask",
                             "responseType": "ResReceiveActivityFlipTask"
@@ -4111,6 +4234,26 @@
                         "gainRankPointReward": {
                             "requestType": "ReqGainRankPointReward",
                             "responseType": "ResCommon"
+                        },
+                        "richmanActivityNextMove": {
+                            "requestType": "ReqRichmanNextMove",
+                            "responseType": "ResRichmanNextMove"
+                        },
+                        "richmanAcitivitySpecialMove": {
+                            "requestType": "ReqRichmanSpecialMove",
+                            "responseType": "ResRichmanNextMove"
+                        },
+                        "richmanActivityChestInfo": {
+                            "requestType": "ReqRichmanChestInfo",
+                            "responseType": "ResRichmanChestInfo"
+                        },
+                        "createGameObserveAuth": {
+                            "requestType": "ReqCreateGameObserveAuth",
+                            "responseType": "ResCreateGameObserveAuth"
+                        },
+                        "refreshGameObserveAuth": {
+                            "requestType": "ReqRefreshGameObserveAuth",
+                            "responseType": "ResRefreshGameObserveAuth"
                         }
                     }
                 },
@@ -4526,6 +4669,22 @@
                             "rule": "repeated",
                             "type": "uint32",
                             "id": 8
+                        }
+                    }
+                },
+                "ReqDMMPreLogin": {
+                    "fields": {
+                        "finish_url": {
+                            "type": "string",
+                            "id": 1
+                        }
+                    }
+                },
+                "ResDMMPreLogin": {
+                    "fields": {
+                        "parameter": {
+                            "type": "string",
+                            "id": 1
                         }
                     }
                 },
@@ -5813,6 +5972,26 @@
                         }
                     }
                 },
+                "ReqSolveGooglePlayOrderV3": {
+                    "fields": {
+                        "order_id": {
+                            "type": "string",
+                            "id": 1
+                        },
+                        "transaction_id": {
+                            "type": "string",
+                            "id": 2
+                        },
+                        "token": {
+                            "type": "string",
+                            "id": 3
+                        },
+                        "account_id": {
+                            "type": "uint32",
+                            "id": 4
+                        }
+                    }
+                },
                 "ReqCancelGooglePlayOrder": {
                     "fields": {
                         "order_id": {
@@ -6451,6 +6630,58 @@
                         }
                     }
                 },
+                "ReqCreateDMMOrder": {
+                    "fields": {
+                        "goods_id": {
+                            "type": "uint32",
+                            "id": 1
+                        },
+                        "account_id": {
+                            "type": "uint32",
+                            "id": 2
+                        },
+                        "client_type": {
+                            "type": "uint32",
+                            "id": 3
+                        }
+                    }
+                },
+                "ResCreateDmmOrder": {
+                    "fields": {
+                        "error": {
+                            "type": "Error",
+                            "id": 1
+                        },
+                        "order_id": {
+                            "type": "string",
+                            "id": 2
+                        },
+                        "transaction_id": {
+                            "type": "string",
+                            "id": 3
+                        },
+                        "dmm_user_id": {
+                            "type": "string",
+                            "id": 4
+                        },
+                        "token": {
+                            "type": "string",
+                            "id": 5
+                        },
+                        "callback_url": {
+                            "type": "string",
+                            "id": 6
+                        },
+                        "request_time": {
+                            "type": "string",
+                            "id": 9
+                        },
+                        "dmm_app_id": {
+                            "type": "string",
+                            "id": 10
+                        }
+                    }
+                },
                 "ReqCreateIAPOrder": {
                     "fields": {
                         "goods_id": {
@@ -6511,6 +6742,50 @@
                         }
                     }
                 },
+                "ReqCreateMyCardOrder": {
+                    "fields": {
+                        "goods_id": {
+                            "type": "uint32",
+                            "id": 1
+                        },
+                        "client_type": {
+                            "type": "uint32",
+                            "id": 2
+                        },
+                        "account_id": {
+                            "type": "uint32",
+                            "id": 3
+                        }
+                    }
+                },
+                "ResCreateMyCardOrder": {
+                    "fields": {
+                        "error": {
+                            "type": "Error",
+                            "id": 1
+                        },
+                        "auth_code": {
+                            "type": "string",
+                            "id": 2
+                        },
+                        "order_id": {
+                            "type": "string",
+                            "id": 3
+                        }
+                    }
+                },
+                "ReqVerifyMyCardOrder": {
+                    "fields": {
+                        "order_id": {
+                            "type": "string",
+                            "id": 1
+                        },
+                        "account_id": {
+                            "type": "uint32",
+                            "id": 2
+                        }
+                    }
+                },
                 "ReqOpenChest": {
                     "fields": {
                         "chest_id": {
@@ -6541,6 +6816,10 @@
                         "total_open_count": {
                             "type": "uint32",
                             "id": 3
+                        },
+                        "faith_count": {
+                            "type": "uint32",
+                            "id": 4
                         }
                     }
                 },
@@ -6569,6 +6848,10 @@
                         "consume_count": {
                             "type": "uint32",
                             "id": 3
+                        },
+                        "faith_count": {
+                            "type": "uint32",
+                            "id": 4
                         }
                     }
                 },
@@ -6650,6 +6933,16 @@
                         "send_gift_limit": {
                             "type": "uint32",
                             "id": 6
+                        },
+                        "finished_endings": {
+                            "rule": "repeated",
+                            "type": "uint32",
+                            "id": 7
+                        },
+                        "rewarded_endings": {
+                            "rule": "repeated",
+                            "type": "uint32",
+                            "id": 8
                         }
                     }
                 },
@@ -6888,6 +7181,22 @@
                         }
                     }
                 },
+                "ReqFinishedEnding": {
+                    "fields": {
+                        "character_id": {
+                            "type": "uint32",
+                            "id": 1
+                        },
+                        "story_id": {
+                            "type": "uint32",
+                            "id": 2
+                        },
+                        "ending_id": {
+                            "type": "uint32",
+                            "id": 3
+                        }
+                    }
+                },
                 "ReqGMCommand": {
                     "fields": {
                         "command": {
@@ -7073,8 +7382,22 @@
                         },
                         "faiths": {
                             "rule": "repeated",
-                            "type": "FaithData",
+                            "type": "MiscFaithData",
                             "id": 3
+                        }
+                    },
+                    "nested": {
+                        "MiscFaithData": {
+                            "fields": {
+                                "faith_id": {
+                                    "type": "uint32",
+                                    "id": 1
+                                },
+                                "count": {
+                                    "type": "uint32",
+                                    "id": 2
+                                }
+                            }
                         }
                     }
                 },
@@ -7183,6 +7506,26 @@
                         "extend_list": {
                             "rule": "repeated",
                             "type": "CustomizedContestExtend",
+                            "id": 2
+                        }
+                    }
+                },
+                "ReqFetchCustomizedContestAuthInfo": {
+                    "fields": {
+                        "unique_id": {
+                            "type": "uint32",
+                            "id": 1
+                        }
+                    }
+                },
+                "ResFetchCustomizedContestAuthInfo": {
+                    "fields": {
+                        "error": {
+                            "type": "Error",
+                            "id": 1
+                        },
+                        "observer_level": {
+                            "type": "uint32",
                             "id": 2
                         }
                     }
@@ -7398,6 +7741,21 @@
                             "rule": "repeated",
                             "type": "ActivitySignInData",
                             "id": 7
+                        },
+                        "richman_data": {
+                            "rule": "repeated",
+                            "type": "ActivityRichmanData",
+                            "id": 8
+                        },
+                        "period_task_progress_list": {
+                            "rule": "repeated",
+                            "type": "TaskProgress",
+                            "id": 9
+                        },
+                        "random_task_progress_list": {
+                            "rule": "repeated",
+                            "type": "TaskProgress",
+                            "id": 10
                         }
                     },
                     "nested": {
@@ -7414,6 +7772,55 @@
                                 "last_sign_in_time": {
                                     "type": "uint32",
                                     "id": 3
+                                }
+                            }
+                        },
+                        "BuffData": {
+                            "fields": {
+                                "type": {
+                                    "type": "uint32",
+                                    "id": 1
+                                },
+                                "remain": {
+                                    "type": "uint32",
+                                    "id": 2
+                                },
+                                "effect": {
+                                    "type": "uint32",
+                                    "id": 3
+                                }
+                            }
+                        },
+                        "ActivityRichmanData": {
+                            "fields": {
+                                "activity_id": {
+                                    "type": "uint32",
+                                    "id": 1
+                                },
+                                "location": {
+                                    "type": "uint32",
+                                    "id": 2
+                                },
+                                "finished_count": {
+                                    "type": "uint32",
+                                    "id": 3
+                                },
+                                "chest_position": {
+                                    "type": "uint32",
+                                    "id": 4
+                                },
+                                "bank_save": {
+                                    "type": "uint32",
+                                    "id": 5
+                                },
+                                "exp": {
+                                    "type": "uint32",
+                                    "id": 6
+                                },
+                                "buff": {
+                                    "rule": "repeated",
+                                    "type": "BuffData",
+                                    "id": 7
                                 }
                             }
                         }
@@ -7559,6 +7966,211 @@
                             "id": 1
                         },
                         "activity_id": {
+                            "type": "uint32",
+                            "id": 2
+                        }
+                    }
+                },
+                "ReqRichmanNextMove": {
+                    "fields": {
+                        "activity_id": {
+                            "type": "uint32",
+                            "id": 1
+                        }
+                    }
+                },
+                "ResRichmanNextMove": {
+                    "fields": {
+                        "paths": {
+                            "rule": "repeated",
+                            "type": "PathData",
+                            "id": 1
+                        },
+                        "dice": {
+                            "type": "uint32",
+                            "id": 2
+                        },
+                        "location": {
+                            "type": "uint32",
+                            "id": 3
+                        },
+                        "finished_count": {
+                            "type": "uint32",
+                            "id": 4
+                        },
+                        "step": {
+                            "type": "uint32",
+                            "id": 5
+                        },
+                        "buff": {
+                            "rule": "repeated",
+                            "type": "BuffData",
+                            "id": 6
+                        },
+                        "bank_save": {
+                            "type": "uint32",
+                            "id": 7
+                        },
+                        "chest_position": {
+                            "type": "uint32",
+                            "id": 8
+                        },
+                        "exp": {
+                            "type": "uint32",
+                            "id": 9
+                        },
+                        "bank_save_add": {
+                            "type": "uint32",
+                            "id": 10
+                        },
+                        "error": {
+                            "type": "Error",
+                            "id": 11
+                        }
+                    },
+                    "nested": {
+                        "RewardData": {
+                            "fields": {
+                                "resource_id": {
+                                    "type": "uint32",
+                                    "id": 1
+                                },
+                                "count": {
+                                    "type": "uint32",
+                                    "id": 2
+                                },
+                                "origin_count": {
+                                    "type": "uint32",
+                                    "id": 3
+                                },
+                                "is_chest": {
+                                    "type": "uint32",
+                                    "id": 4
+                                }
+                            }
+                        },
+                        "PathData": {
+                            "fields": {
+                                "location": {
+                                    "type": "uint32",
+                                    "id": 1
+                                },
+                                "rewards": {
+                                    "rule": "repeated",
+                                    "type": "RewardData",
+                                    "id": 2
+                                },
+                                "events": {
+                                    "rule": "repeated",
+                                    "type": "uint32",
+                                    "id": 3
+                                }
+                            }
+                        },
+                        "BuffData": {
+                            "fields": {
+                                "type": {
+                                    "type": "uint32",
+                                    "id": 1
+                                },
+                                "remain": {
+                                    "type": "uint32",
+                                    "id": 2
+                                },
+                                "effect": {
+                                    "type": "uint32",
+                                    "id": 3
+                                }
+                            }
+                        }
+                    }
+                },
+                "ReqRichmanSpecialMove": {
+                    "fields": {
+                        "activity_id": {
+                            "type": "uint32",
+                            "id": 1
+                        },
+                        "step": {
+                            "type": "uint32",
+                            "id": 2
+                        }
+                    }
+                },
+                "ReqRichmanChestInfo": {
+                    "fields": {
+                        "activity_id": {
+                            "type": "uint32",
+                            "id": 1
+                        }
+                    }
+                },
+                "ResRichmanChestInfo": {
+                    "fields": {
+                        "items": {
+                            "rule": "repeated",
+                            "type": "ItemData",
+                            "id": 1
+                        },
+                        "error": {
+                            "type": "Error",
+                            "id": 2
+                        }
+                    },
+                    "nested": {
+                        "ItemData": {
+                            "fields": {
+                                "id": {
+                                    "type": "uint32",
+                                    "id": 1
+                                },
+                                "count": {
+                                    "type": "uint32",
+                                    "id": 2
+                                }
+                            }
+                        }
+                    }
+                },
+                "ReqCreateGameObserveAuth": {
+                    "fields": {
+                        "game_uuid": {
+                            "type": "string",
+                            "id": 1
+                        }
+                    }
+                },
+                "ResCreateGameObserveAuth": {
+                    "fields": {
+                        "error": {
+                            "type": "Error",
+                            "id": 1
+                        },
+                        "token": {
+                            "type": "string",
+                            "id": 2
+                        },
+                        "location": {
+                            "type": "string",
+                            "id": 3
+                        }
+                    }
+                },
+                "ReqRefreshGameObserveAuth": {
+                    "fields": {
+                        "token": {
+                            "type": "string",
+                            "id": 1
+                        }
+                    }
+                },
+                "ResRefreshGameObserveAuth": {
+                    "fields": {
+                        "error": {
+                            "type": "Error",
+                            "id": 1
+                        },
+                        "ttl": {
                             "type": "uint32",
                             "id": 2
                         }
@@ -8855,6 +9467,18 @@
                         "voteGameEnd": {
                             "requestType": "ReqVoteGameEnd",
                             "responseType": "ResGameEndVote"
+                        },
+                        "authObserve": {
+                            "requestType": "ReqAuthObserve",
+                            "responseType": "ResCommon"
+                        },
+                        "startObserve": {
+                            "requestType": "ReqCommon",
+                            "responseType": "ResStartObserve"
+                        },
+                        "stopObserve": {
+                            "requestType": "ReqCommon",
+                            "responseType": "ResCommon"
                         }
                     }
                 },
@@ -9092,6 +9716,26 @@
                         "error": {
                             "type": "Error",
                             "id": 3
+                        }
+                    }
+                },
+                "ReqAuthObserve": {
+                    "fields": {
+                        "token": {
+                            "type": "string",
+                            "id": 1
+                        }
+                    }
+                },
+                "ResStartObserve": {
+                    "fields": {
+                        "head": {
+                            "type": "GameLiveHead",
+                            "id": 1
+                        },
+                        "passed": {
+                            "type": "GameLiveSegment",
+                            "id": 2
                         }
                     }
                 },
@@ -9382,6 +10026,14 @@
                                     "id": 2
                                 }
                             }
+                        }
+                    }
+                },
+                "NotifyObserveData": {
+                    "fields": {
+                        "unit": {
+                            "type": "GameLiveUnit",
+                            "id": 1
                         }
                     }
                 }

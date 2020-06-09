@@ -136,7 +136,7 @@ class MajsoulHandler:
                     # 胡了
                     data = liqi_dict['data']['data']
                     info = data['hules']
-                    if len(info > 1):
+                    if len(info) > 1:
                         # 虽然双胡，但是我不画蛇添足搞事情
                         pass
                     info = info[0]
