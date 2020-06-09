@@ -136,7 +136,9 @@ class MajsoulHandler:
                     # 胡了
                     data = liqi_dict['data']['data']
                     info = data['hules']
-                    assert(len(info) == 1)
+                    if len(info > 1):
+                        # 虽然双胡，但是我不画蛇添足搞事情
+                        pass
                     info = info[0]
                     hand = info['hand']
                     huTile = info['huTile']
@@ -224,7 +226,7 @@ class MajsoulHandler:
         assert(0 <= seat < 4)
         assert(tile in all_tiles)
         if operation != None:
-            assert(operation['seat'] == self.mySeat)
+            assert(operation.get('seat', 0) == self.mySeat)
             opList = operation.get('operationList', [])
             canChi = any(op['type'] == Operation.Chi.value for op in opList)
             canPeng = any(op['type'] == Operation.Peng.value for op in opList)
@@ -256,7 +258,7 @@ class MajsoulHandler:
         assert(tile in all_tiles)
         assert(type(liqi) == dict or liqi == None)
         if operation != None:
-            assert(operation['seat'] == self.mySeat)
+            assert(operation.get('seat', 0) == self.mySeat)
             opList = operation.get('operationList', [])
             canLiqi = any(op['type'] == 7 for op in opList)
 

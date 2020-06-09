@@ -166,6 +166,10 @@ class GUIInterface:
         self.tiaoguoImg = load('tiaoguo.png')
         self.liqiImg = load('liqi.png')
 
+    def forceTiaoGuo(self):
+        # 如果跳过按钮在屏幕上则强制点跳过，否则NoEffect
+        self.clickButton(self.tiaoguoImg, similarityThreshold=0.7)
+
     def actionDiscardTile(self, tile: str):
         print('in actionDiscardTile')
         L = self._getHandTiles()
@@ -183,14 +187,14 @@ class GUIInterface:
             'GUIInterface.discardTile tile not found. L:', L, 'tile:', tile)
         return False
 
-    def actionChiPengGang(self, type: Operation, tiles: List[str]):
-        if type == Operation.NoEffect:
+    def actionChiPengGang(self, type_: Operation, tiles: List[str]):
+        if type_ == Operation.NoEffect:
             self.clickButton(self.tiaoguoImg)
-        elif type == Operation.Chi:
+        elif type_ == Operation.Chi:
             self.clickButton(self.chiImg)
-        elif type == Operation.Peng:
+        elif type_ == Operation.Peng:
             self.clickButton(self.pengImg)
-        elif type in (Operation.MingGang, Operation.JiaGang):
+        elif type_ in (Operation.MingGang, Operation.JiaGang):
             self.clickButton(self.gangImg)
 
     def actionLiqi(self, tile: str):
@@ -207,7 +211,7 @@ class GUIInterface:
     def calibrateMenu(self):
         # if the browser is on the initial menu, set self.M and return to True
         # if not return False
-        self.M = getHomographyMatrix(self.menuImg, screenShot(), threshold=0.5)
+        self.M = getHomographyMatrix(self.menuImg, screenShot(), threshold=0.7)
         result = type(self.M) != type(None)
         if result:
             self.waitPos = np.int32(PosTransfer([100, 100], self.M))
@@ -245,7 +249,8 @@ class GUIInterface:
             i += 1
         return result
 
-    def clickButton(self, buttonImg):
+    def clickButton(self, buttonImg, similarityThreshold=0.0):
+        # 点击吃碰杠胡立直自摸
         x0, y0 = np.int32(PosTransfer([0, 0], self.M))
         x1, y1 = np.int32(PosTransfer(Layout.size, self.M))
         zoom = (x1-x0)/Layout.size[0]
@@ -256,12 +261,64 @@ class GUIInterface:
         x0, y0 = np.int32(PosTransfer([595, 557], self.M))
         x1, y1 = np.int32(PosTransfer([1508, 912], self.M))
         img = screenShot()[y0:y1, x0:x1, :]
-        T = cv2.matchTemplate(img, templ, cv2.TM_SQDIFF, mask=templ)
+        T = cv2.matchTemplate(img, templ, cv2.TM_SQDIFF, mask=templ.copy())
         _, _, (x, y), _ = cv2.minMaxLoc(T)
         if DEBUG:
             T = np.exp((1-T/T.max())*10)
             T = T/T.max()
             cv2.imshow('T', T)
             cv2.waitKey(0)
-        pyautogui.click(x=x+x0+m//2, y=y+y0+n//2, duration=0.2)
-        pyautogui.moveTo(x=self.waitPos[0], y=self.waitPos[1])
+        dst = img[y:y+n, x:x+m].copy()
+        dst[templ == 0] = 0
+        if Similarity(templ, dst) >= similarityThreshold:
+            pyautogui.click(x=x+x0+m//2, y=y+y0+n//2, duration=0.2)
+            pyautogui.moveTo(x=self.waitPos[0], y=self.waitPos[1])
+
+    def clickCandidateMeld(self, tiles: List[str]):
+        # 有多种不同的吃碰方法，二次点击选择
+        assert(len(tiles) == 2)
+        # find all combination tiles
+        result = []
+        assert(type(self.M) != type(None))
+        screen_img = screenShot()
+        img = screen_img.copy()     # for calculation
+        start = np.int32(PosTransfer([960, 753], self.M))
+        leftBound = rightBound = start[0]
+        O = PosTransfer([0, 0], self.M)
+        colorThreshold = 200
+        tileThreshold = np.int32(0.7*(PosTransfer((78, 106), self.M)-O))
+        maxFail = np.int32(PosTransfer([60, 0], self.M)-O)[0]
+        for offset in [-1, 1]:
+            #从中间向左右两个方向扫描
+            i = 0
+            while True:
+                x, y = start[0]+i*offset, start[1]
+                if offset == -1 and x < leftBound-maxFail:
+                    break
+                if offset == 1 and x > rightBound+maxFail:
+                    break
+                if all(img[y, x, :] > colorThreshold):
+                    img[y, x, :] = colorThreshold
+                    retval, image, mask, rect = cv2.floodFill(
+                        image=img, mask=None, seedPoint=(x, y), newVal=(0, 0, 0),
+                        loDiff=(0, 0, 0), upDiff=tuple([255-colorThreshold]*3), flags=cv2.FLOODFILL_FIXED_RANGE)
+                    x, y, dx, dy = rect
+                    if dx > tileThreshold[0] and dy > tileThreshold[1]:
+                        tile_img = screen_img[y:y+dy, x:x+dx, :]
+                        tileStr = classify(tile_img)
+                        result.append((tileStr, (x+dx//2, y+dy//2)))
+                        leftBound = min(leftBound, x)
+                        rightBound = max(rightBound, x+dx)
+                i += 1
+        result = sorted(result, key=lambda x: x[1][0])
+        print('clickCandidateMeld tiles:', result)
+        assert(len(result) % 2 == 0)
+        for i in range(0, len(result), 2):
+            x, y = result[i][1]
+            if tuple(sorted([result[i][0], result[i+1][0]])) == tiles:
+                pyautogui.click(x=x, y=y, duration=0.2)
+                pyautogui.moveTo(x=self.waitPos[0], y=self.waitPos[1])
+                return True
+        raise Exception('combination not found, tiles:',
+                        tiles, ' combination:', result)
+        return False
