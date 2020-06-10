@@ -1,15 +1,22 @@
 # -*- coding: utf-8 -*-
 #Json报文映射到动作回调函数
+import os
 import re
+import sys
 import time
 import inspect
 import pickle
 import functools
+import argparse
+import importlib
 from xmlrpc.client import ServerProxy
 from typing import Dict, List, Tuple
 from enum import Enum
 
-from .liqi import LiqiProto, MsgType
+try:
+    from liqi import LiqiProto, MsgType
+except:
+    from .liqi import LiqiProto, MsgType
 
 PRINT_LOG = True  # whether print args when enter handler
 
@@ -73,12 +80,12 @@ class MajsoulHandler:
     def parse(self, liqi_dict):
         method = liqi_dict['method']
         if method == '.lq.FastTest.authGame':
-            if liqi_dict['type'] == MsgType.Req:
+            if liqi_dict['type'].value == MsgType.Req.value:
                 # 初次进入游戏，请求对局信息
                 self.accountId = liqi_dict['data']['accountId']
                 self.beginGame()
                 return
-            if liqi_dict['type'] == MsgType.Res:
+            if liqi_dict['type'].value == MsgType.Res.value:
                 # 初次进入游戏，对局信息回复
                 self.seatList = liqi_dict['data']['seatList']
                 self.mySeat = self.seatList.index(self.accountId)
@@ -261,7 +268,11 @@ class MajsoulHandler:
         if operation != None:
             assert(operation.get('seat', 0) == self.mySeat)
             opList = operation.get('operationList', [])
-            canLiqi = any(op['type'] == 7 for op in opList)
+            canJiaGang = any(
+                op['type'] == Operation.JiaGang.value for op in opList)
+            canLiqi = any(op['type'] == Operation.Liqi.value for op in opList)
+            canZimo = any(op['type'] == Operation.Zimo.value for op in opList)
+            canHu = any(op['type'] == Operation.Hu.value for op in opList)
 
     @dump_args
     def chiPengGang(self, type_: int, seat: int, tiles: List[str], froms: List[int], tileStates: List[int]):
@@ -299,10 +310,13 @@ class MajsoulHandler:
         seat:杠的玩家
         tiles:杠的牌
         """
+        assert(tiles in all_tiles)
         if type_ == 2:
-            #自己加杠
-            assert(seat == self.mySeat)
-            assert(tiles in all_tiles)
+            # 加杠
+            pass
+        elif type_ == 3:
+            # 暗杠
+            pass
         else:
             raise NotImplementedError
 
@@ -398,12 +412,13 @@ class MajsoulHandler:
             print('Gang')
 
 
-def dumpWebSocket(handler: MajsoulHandler):
+def dumpWebSocket(filename='ws_dump.pkl'):
     # 监听mitmproxy当前websocket，将所有报文按顺序交由handler.parse
     server = ServerProxy("http://127.0.0.1:37247")  # 初始化服务器
     liqi = LiqiProto()
     tot = 0
     history_msg = []
+    handler = MajsoulHandler()
     while True:
         n = server.get_len()
         if tot < n:
@@ -413,13 +428,14 @@ def dumpWebSocket(handler: MajsoulHandler):
                 handler.parse(result)
                 tot += 1
             history_msg = history_msg+flow
-            pickle.dump(history_msg, open('websocket_frames.pkl', 'wb'))
+            pickle.dump(history_msg, open(filename, 'wb'))
         time.sleep(0.2)
 
 
-def replayWebSocket(handler: MajsoulHandler):
+def replayWebSocket(filename='ws_dump.pkl'):
     # 回放历史websocket报文，按顺序交由handler.parse
-    history_msg = pickle.load(open('websocket_frames.pkl', 'rb'))
+    handler = MajsoulHandler()
+    history_msg = pickle.load(open(filename, 'rb'))
     liqi = LiqiProto()
     for flow_msg in history_msg:
         result = liqi.parse(flow_msg)
@@ -427,6 +443,15 @@ def replayWebSocket(handler: MajsoulHandler):
 
 
 if __name__ == '__main__':
-    handler = MajsoulHandler()
-    #dumpWebSocket(handler)
-    replayWebSocket(handler)
+    parser = argparse.ArgumentParser(description="Demo of SDK")
+    parser.add_argument('-d', '--dump', default='')
+    parser.add_argument('-l', '--load', default='')
+    args = parser.parse_args()
+    if args.dump != '':
+        dumpWebSocket(args.dump)
+    elif args.load != '':
+        replayWebSocket(args.load)
+    else:
+        print('Instruction not supported.')
+        print('Use "python -m majsoul_wrapper.sdk --dump FILE"')
+        print(' or "python -m majsoul_wrapper.sdk --load FILE"')

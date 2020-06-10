@@ -7,6 +7,7 @@ import json
 import struct
 import pickle
 import random
+import argparse
 from xmlrpc.client import ServerProxy
 import base64
 from enum import Enum
@@ -15,9 +16,10 @@ from typing import List, Tuple, Dict
 
 from google.protobuf.json_format import MessageToDict
 
-sys.path.append(os.path.dirname(__file__))
-pb = importlib.import_module('proto.liqi_pb2')
-sys.path.remove(os.path.dirname(__file__))
+try:
+    from .proto import liqi_pb2 as pb
+except:
+    from proto import liqi_pb2 as pb
 
 
 class MsgType(Enum):
@@ -131,11 +133,6 @@ def tamperUsetime(flow_msg) -> bool:
                     L3 = fromProtobuf(d3['data'])
                     if getById(L3, 5) != None:
                         d4 = getById(L3, 4)
-                        #print('L0', L0)
-                        #print('L1', L1)
-                        #print('L2', L2)
-                        #print('d3', d3)
-                        #print('L3', L3)
                         if d4 != None:
                             x = 1+L0[1]['begin']+2+L1[2]['begin'] + \
                                 2+d3['begin']+2+d4['begin']+1
@@ -248,7 +245,7 @@ def toProtobuf(data: List[Dict]) -> bytes:
     return result
 
 
-def dumpWebSocket():
+def dumpWebSocket(filename='ws_dump.pkl'):
     server = ServerProxy("http://127.0.0.1:37247")  # 初始化服务器
     liqi = LiqiProto()
     tot = 0
@@ -267,14 +264,13 @@ def dumpWebSocket():
                 #      "]: decode the packet here: %r…" % packet)
                 tot += 1
             history_msg = history_msg+flow
-            path = os.path.join(os.path.dirname(
-                __file__), 'websocket_frames.pkl')
+            path = filename
             pickle.dump(history_msg, open(path, 'wb'))
         time.sleep(0.2)
 
 
-def replayWebSocket():
-    path = os.path.join(os.path.dirname(__file__), 'websocket_frames.pkl')
+def replayWebSocket(filename='ws_dump.pkl'):
+    path = filename
     history_msg = pickle.load(open(path, 'rb'))
     liqi = LiqiProto()
     for flow_msg in history_msg:
@@ -284,5 +280,16 @@ def replayWebSocket():
 
 
 if __name__ == '__main__':
-    #dumpWebSocket()
-    replayWebSocket()
+    parser = argparse.ArgumentParser(description="Demo of Liqi Proto")
+    parser.add_argument('-d', '--dump', default='')
+    parser.add_argument('-l', '--load', default='')
+    args = parser.parse_args()
+    print(args)
+    if args.dump != '':
+        dumpWebSocket(args.dump)
+    elif args.load != '':
+        replayWebSocket(args.load)
+    else:
+        print('Instruction not supported.')
+        print('Use "python -m majsoul_wrapper.liqi --dump FILE"')
+        print(' or "python -m majsoul_wrapper.liqi --load FILE"')

@@ -8,7 +8,7 @@ import cv2
 import pyautogui
 import numpy as np
 
-from .classifier import classify
+from .classifier import Classify
 from ..sdk import Operation
 
 pyautogui.PAUSE = 0         # 函数执行后暂停时间
@@ -166,21 +166,21 @@ class GUIInterface:
         self.zimoImg = load('zimo.png')
         self.tiaoguoImg = load('tiaoguo.png')
         self.liqiImg = load('liqi.png')
+        # load classify model
+        self.classify = Classify()
 
     def forceTiaoGuo(self):
         # 如果跳过按钮在屏幕上则强制点跳过，否则NoEffect
         self.clickButton(self.tiaoguoImg, similarityThreshold=0.7)
 
     def actionDiscardTile(self, tile: str):
-        print('in actionDiscardTile')
         L = self._getHandTiles()
-        print('actionDiscardTile tile:', tile, ' list:', L)
         for t, (x, y) in L:
             if t == tile:
                 pyautogui.moveTo(x=x, y=y)
                 time.sleep(0.3)
                 pyautogui.click(x=x, y=y, button='left')
-                time.sleep(0.1)
+                time.sleep(1)
                 # out of screen
                 pyautogui.moveTo(x=self.waitPos[0], y=self.waitPos[1])
                 return True
@@ -200,7 +200,7 @@ class GUIInterface:
 
     def actionLiqi(self, tile: str):
         self.clickButton(self.liqiImg)
-        time.sleep(0.2)
+        time.sleep(0.5)
         self.actionDiscardTile(tile)
 
     def actionHu(self):
@@ -242,7 +242,7 @@ class GUIInterface:
                 x, y, dx, dy = rect
                 if dx > tileThreshold[0] and dy > tileThreshold[1]:
                     tile_img = screen_img[y:y+dy, x:x+dx, :]
-                    tileStr = classify(tile_img)
+                    tileStr = self.classify(tile_img)
                     result.append((tileStr, (x+dx//2, y+dy//2)))
                     i = x+dx-start[0]
             else:
@@ -273,6 +273,7 @@ class GUIInterface:
         dst[templ == 0] = 0
         if Similarity(templ, dst) >= similarityThreshold:
             pyautogui.click(x=x+x0+m//2, y=y+y0+n//2, duration=0.2)
+            time.sleep(0.5)
             pyautogui.moveTo(x=self.waitPos[0], y=self.waitPos[1])
 
     def clickCandidateMeld(self, tiles: List[str]):
@@ -306,7 +307,7 @@ class GUIInterface:
                     x, y, dx, dy = rect
                     if dx > tileThreshold[0] and dy > tileThreshold[1]:
                         tile_img = screen_img[y:y+dy, x:x+dx, :]
-                        tileStr = classify(tile_img)
+                        tileStr = self.classify(tile_img)
                         result.append((tileStr, (x+dx//2, y+dy//2)))
                         leftBound = min(leftBound, x)
                         rightBound = max(rightBound, x+dx)
@@ -318,6 +319,7 @@ class GUIInterface:
             x, y = result[i][1]
             if tuple(sorted([result[i][0], result[i+1][0]])) == tiles:
                 pyautogui.click(x=x, y=y, duration=0.2)
+                time.sleep(1)
                 pyautogui.moveTo(x=self.waitPos[0], y=self.waitPos[1])
                 return True
         raise Exception('combination not found, tiles:',
@@ -348,13 +350,12 @@ class GUIInterface:
             # 王座之间在屏幕外面需要先拖一下
             x, y = np.int32(PosTransfer(Layout.menuButtons[2], self.M))
             pyautogui.moveTo(x, y)
-            time.sleep(1)
+            time.sleep(1.5)
             x, y = np.int32(PosTransfer(Layout.menuButtons[0], self.M))
             pyautogui.dragTo(x, y)
-            time.sleep(1)
+            time.sleep(1.5)
         x, y = np.int32(PosTransfer(Layout.menuButtons[level], self.M))
         pyautogui.click(x, y)
         time.sleep(2)
-        x, y = np.int32(PosTransfer(Layout.menuButtons[0], self.M)) # 四人东
+        x, y = np.int32(PosTransfer(Layout.menuButtons[0], self.M))  # 四人东
         pyautogui.click(x, y)
-

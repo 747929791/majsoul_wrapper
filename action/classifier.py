@@ -85,21 +85,22 @@ class TileNet(nn.Module):
         return x
 
 
-model = TileNet()
-path = os.path.join(os.path.dirname(__file__), 'tile.model')
-model.load_state_dict(torch.load(path))
-model.to(device)
+class Classify:
 
+    def __init__(self):
+        self.model = model = TileNet()
+        path = os.path.join(os.path.dirname(__file__), 'tile.model')
+        self.model.load_state_dict(torch.load(path))
+        self.model.to(device)
+        self.__call__(np.ones((32, 32, 3), dtype=np.uint8))  # load cache
 
-def classify(img: np.ndarray):
-    img = transform(CV2PIL(img))
-    c, n, m = img.shape
-    img = img.view(1, c, n, m).to(device)
-    with torch.no_grad():
-        _, predicted = torch.max(model(img), 1)
-        TileID = predicted[0]
-        TileName = classes[TileID.item()]
-    return TileName
+    def __call__(self, img: np.ndarray):
+        img = transform(CV2PIL(img))
+        c, n, m = img.shape
+        img = img.view(1, c, n, m).to(device)
+        with torch.no_grad():
+            _, predicted = torch.max(self.model(img), 1)
+            TileID = predicted[0]
+            TileName = classes[TileID.item()]
+        return TileName
 
-
-classify(np.ones((32, 32, 3), dtype=np.uint8))  # load cache

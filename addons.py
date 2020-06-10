@@ -129,7 +129,7 @@ def RPC_init():
     server.register_function(get_len, "get_len")
     server.register_function(get_item, "get_item")
     server.register_function(get_items, "get_items")
-    print("RPC Server Listening for Client.")
+    print("RPC Server Listening on 127.0.0.1:37247 for Client.")
     server.serve_forever()
 
 
