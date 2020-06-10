@@ -284,7 +284,6 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--dump', default='')
     parser.add_argument('-l', '--load', default='')
     args = parser.parse_args()
-    print(args)
     if args.dump != '':
         dumpWebSocket(args.dump)
     elif args.load != '':
