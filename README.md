@@ -47,8 +47,8 @@ server = ServerProxy("http://127.0.0.1:37247")   # 初始化服务器
 n = server.get_len()                             # websocket中数据包的总数
 flow = pickle.loads(server.get_items(0, n).data) # 获得所有数据对象的列表
 flow_msg = pickle.loads(server.get_item(0).data) # 获得第0号数据对象
-buffer = flow_msg.content						 # 数据二进制内容
-from_client = flow_msg.from_client				 # 数据是否来自客户端
+buffer = flow_msg.content                        # 数据二进制内容
+from_client = flow_msg.from_client               # 数据是否来自客户端
 ```
 
 ### websocket解析
@@ -174,8 +174,8 @@ $pip install pyautogui opencv-python
 #### 通信格式(Liqi Proto)
 
 在雀魂与浏览器之间的websocket数据由**消息头**+**Protobuf载荷**两部分构成，消息头有三种类型：
-|消息类型|编码格式|首字节|用途|
-|-|-|-|
+| 消息类型 | 编码格式 | 首字节 | 用途 |
+| - | - | - | - |
 |Notify|1+n|0x01|服务器向客户端发送通知|
 |Request|1+2+n|0x02|客户端向服务器发送请求|
 |Response|1+2+n|0x03|服务器回复客户端的请求|
