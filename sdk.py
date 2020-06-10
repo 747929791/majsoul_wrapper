@@ -67,7 +67,8 @@ class MajsoulHandler:
         'ActionMJStart',                        # 通知麻将开始
     }
 
-    isMajsoulReady = False                   # Majsoul是否处于对局中
+    isMajsoulReady = False                      # Majsoul是否处于对局中
+    isEnd = False                               # Majsoul刚刚结束一场对局
 
     def parse(self, liqi_dict):
         method = liqi_dict['method']
@@ -341,11 +342,14 @@ class MajsoulHandler:
     def beginGame(self):
         #开始整场对局
         self.isMajsoulReady = True
+        print('BeginGame Game')
 
     @dump_args
     def endGame(self):
         #结束整场对局
         self.isMajsoulReady = False
+        self.isEnd = True
+        print('End Game')
 
     #-------------------------Majsoul动作函数-------------------------
 

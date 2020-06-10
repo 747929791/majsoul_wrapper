@@ -145,7 +145,8 @@ def screenShot():
 class Layout:
     size = (1920, 1080)                                     # 界面长宽
     duanWeiChang = (1348, 321)                              # 段位场按钮
-    menuButtons = [(1382, 406), (1382, 573), (1382, 740)]   # 铜/银/金之间按钮
+    menuButtons = [(1382, 406), (1382, 573), (1382, 740),
+                   (1383, 885), (1393, 813)]   # 铜/银/金之间按钮
     tileSize = (95, 152)                                     # 自己牌的大小
 
 
@@ -322,3 +323,38 @@ class GUIInterface:
         raise Exception('combination not found, tiles:',
                         tiles, ' combination:', result)
         return False
+
+    def actionReturnToMenu(self):
+        # 在终局以后点击确定跳转回菜单主界面
+        x, y = np.int32(PosTransfer((1785, 1003), self.M))  # 终局确认按钮
+        while True:
+            time.sleep(10)
+            x0, y0 = np.int32(PosTransfer([0, 0], self.M))
+            x1, y1 = np.int32(PosTransfer(Layout.size, self.M))
+            img = screenShot()
+            S = Similarity(self.menuImg, img[y0:y1, x0:x1, :])
+            if S > 0.5:
+                return True
+            else:
+                pyautogui.click(x=x, y=y, duration=0.5)
+
+    def actionBeginGame(self, level: int):
+        # 从开始界面点击匹配对局, level=0~4 (铜/银/金/玉/王座之间)
+        time.sleep(2)
+        x, y = np.int32(PosTransfer(Layout.duanWeiChang, self.M))
+        pyautogui.click(x, y)
+        time.sleep(2)
+        if level == 4:
+            # 王座之间在屏幕外面需要先拖一下
+            x, y = np.int32(PosTransfer(Layout.menuButtons[2], self.M))
+            pyautogui.moveTo(x, y)
+            time.sleep(1)
+            x, y = np.int32(PosTransfer(Layout.menuButtons[0], self.M))
+            pyautogui.dragTo(x, y)
+            time.sleep(1)
+        x, y = np.int32(PosTransfer(Layout.menuButtons[level], self.M))
+        pyautogui.click(x, y)
+        time.sleep(2)
+        x, y = np.int32(PosTransfer(Layout.menuButtons[0], self.M)) # 四人东
+        pyautogui.click(x, y)
+
