@@ -166,7 +166,8 @@ class MajsoulHandler:
                     data = liqi_dict['data']['data']
                     players = data['players']
                     assert(len(players) == 4)
-                    tingpai = [players[i].get('tingpai', False) for i in range(4)]
+                    tingpai = [players[i].get('tingpai', False)
+                               for i in range(4)]
                     hands = [players[i]['hand'] if tingpai[i] else []
                              for i in range(4)]
                     scores = data['scores']

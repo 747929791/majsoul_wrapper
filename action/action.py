@@ -222,7 +222,10 @@ class GUIInterface:
         # return a list of my tiles' position
         result = []
         assert(type(self.M) != type(None))
-        screen_img = screenShot()
+        screen_img1 = screenShot()
+        time.sleep(0.5)
+        screen_img2 = screenShot()
+        screen_img = np.minimum(screen_img1,screen_img2) #消除高光动画
         img = screen_img.copy()     # for calculation
         start = np.int32(PosTransfer([235, 1002], self.M))
         O = PosTransfer([0, 0], self.M)
