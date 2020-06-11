@@ -182,6 +182,8 @@ class MajsoulHandler:
                     seat = data.get('seat', 0)
                     tiles = data['tiles']
                     return self.anGangAddGang(type_, seat, tiles)
+                elif action_name == 'ActionLiuJu':
+                    return self.newRoundButLiuju()
                 else:
                     raise NotImplementedError
         elif method in self.no_effect_method:
@@ -350,6 +352,13 @@ class MajsoulHandler:
         deltaScores::新分减旧分
         """
         assert(all(tile in all_tiles for hand in hands for tile in hand))
+
+    @dump_args
+    def newRoundButLiuju(self):
+        """
+        四风连打与九种九牌(?)引起的开局流局
+        """
+        pass
 
     @dump_args
     def beginGame(self):

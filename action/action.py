@@ -225,7 +225,7 @@ class GUIInterface:
         screen_img1 = screenShot()
         time.sleep(0.5)
         screen_img2 = screenShot()
-        screen_img = np.minimum(screen_img1,screen_img2) #消除高光动画
+        screen_img = np.minimum(screen_img1, screen_img2)  # 消除高光动画
         img = screen_img.copy()     # for calculation
         start = np.int32(PosTransfer([235, 1002], self.M))
         O = PosTransfer([0, 0], self.M)
@@ -316,8 +316,8 @@ class GUIInterface:
                         rightBound = max(rightBound, x+dx)
                 i += 1
         result = sorted(result, key=lambda x: x[1][0])
-        if len(result)==0:
-            return True # 其他人先抢先Meld了！
+        if len(result) == 0:
+            return True  # 其他人先抢先Meld了！
         print('clickCandidateMeld tiles:', result)
         assert(len(result) % 2 == 0)
         for i in range(0, len(result), 2):
