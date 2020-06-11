@@ -164,8 +164,6 @@ class MajsoulHandler:
                 elif action_name == 'ActionNoTile':
                     #流局
                     data = liqi_dict['data']['data']
-                    import sys
-                    sys.stdout.flush()
                     players = data['players']
                     assert(len(players) == 4)
                     tingpai = ['tingpai' in players[i] for i in range(4)]
