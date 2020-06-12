@@ -192,7 +192,7 @@ class MajsoulHandler:
                     return self.anGangAddGang(type_, seat, tiles)
                 elif action_name == 'ActionLiuJu':
                     #开局流局
-                    return self.newRoundButLiuju()
+                    return self.specialLiuju()
                 else:
                     raise NotImplementedError
         elif method in self.no_effect_method:
@@ -366,9 +366,9 @@ class MajsoulHandler:
         assert(all(tile in all_tiles for hand in hands for tile in hand))
 
     @dump_args
-    def newRoundButLiuju(self):
+    def specialLiuju(self):
         """
-        四风连打与九种九牌(?)引起的开局流局
+        四风连打、九种九牌、四杠散了引起的流局
         """
         pass
 

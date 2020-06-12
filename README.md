@@ -103,7 +103,7 @@ $python liqi.py --load FILE # low level的解析FILE并打印至stdout
 |*newDora*|出现杠而新增明宝牌|
 |*hule*|某玩家胡牌了|
 |*liuju*|无牌流局|
-|*newRoundButLiuju*|开局流局(四风连打，九种九牌)|
+|*specialLiuju*|四风连打、九种九牌、四杠散了引起的流局|
 |*beginGame*|在整场比赛开始前调用|
 |*endGame*|在整场比赛结束后调用|
 
