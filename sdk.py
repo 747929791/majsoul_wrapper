@@ -89,37 +89,46 @@ class MajsoulHandler:
                 # 初次进入游戏，对局信息回复
                 self.seatList = liqi_dict['data']['seatList']
                 self.mySeat = self.seatList.index(self.accountId)
+                self.doras = []
                 return self.authGame(self.accountId, self.seatList)
         elif method == '.lq.NotifyGameEndResult':
             self.endGame()
         elif method == '.lq.ActionPrototype':
             if 'name' in liqi_dict['data']:
                 action_name = liqi_dict['data']['name']
+                data = liqi_dict['data'].get('data', {})
+                if action_name in ('ActionDiscardTile', 'ActionDealTile'):
+                    # 单独判断数据里是否有新的明宝牌
+                    doras = data.get('doras', [])
+                    if len(doras) > len(self.doras):
+                        # 新增明宝牌
+                        for dora_tile in self.doras:
+                            doras.remove(dora_tile)
+                        assert(len(doras) == 1)
+                        new_dora = doras[0]
+                        self.doras.append(new_dora)
+                        self.newDora(new_dora)
                 if action_name in self.no_effect_action:
                     return
                 elif action_name == 'ActionNewRound':
                     # 初始手牌
-                    data = liqi_dict['data']['data']
                     ju = data.get('ju', 0)
                     ben = data.get('ben', 0)
                     tiles = data['tiles']
                     scores = data['scores']
                     leftTileCount = data.get('leftTileCount', 0)
                     assert(len(data['doras']) == 1)
-                    doras = data['doras']
+                    self.doras = doras = data['doras']
                     return self.newRound(ju, ben, tiles, scores, leftTileCount, doras)
                 elif action_name == 'ActionDiscardTile':
                     # 他家出牌
-                    data = liqi_dict['data']['data']
                     seat = data.get('seat', 0)
                     tile = data['tile']
                     isLiqi = data.get('isLiqi', False)
                     moqie = data.get('moqie', False)
-                    doras = data.get('doras', [])
                     operation = data.get('operation', None)
-                    return self.discardTile(seat, tile, moqie, isLiqi, doras, operation)
+                    return self.discardTile(seat, tile, moqie, isLiqi, operation)
                 elif action_name == 'ActionDealTile':
-                    data = liqi_dict['data']['data']
                     seat = data.get('seat', 0)
                     liqi = data.get('liqi', None)
                     leftTileCount = data.get('leftTileCount', 0)
@@ -133,7 +142,6 @@ class MajsoulHandler:
                         return self.dealTile(seat, leftTileCount, liqi)
                 elif action_name == 'ActionChiPengGang':
                     # 吃碰杠
-                    data = liqi_dict['data']['data']
                     type_ = data.get('type', 0)
                     seat = data.get('seat', 0)
                     tiles = data['tiles']
@@ -142,7 +150,6 @@ class MajsoulHandler:
                     return self.chiPengGang(type_, seat, tiles, froms, tileStates)
                 elif action_name == 'ActionHule':
                     # 胡了
-                    data = liqi_dict['data']['data']
                     info = data['hules']
                     if len(info) > 1:
                         # 虽然双胡，但是我不画蛇添足搞事情
@@ -162,8 +169,7 @@ class MajsoulHandler:
                     newScores = data['scores']
                     return self.hule(hand, huTile, seat, zimo, liqi, doras, liDoras, fan, fu, oldScores, deltaScores, newScores)
                 elif action_name == 'ActionNoTile':
-                    #流局
-                    data = liqi_dict['data']['data']
+                    #无牌流局
                     players = data['players']
                     assert(len(players) == 4)
                     tingpai = [players[i].get('tingpai', False)
@@ -177,12 +183,13 @@ class MajsoulHandler:
                     deltaScores = scores.get('deltaScores', [0, 0, 0, 0])
                     return self.liuju(tingpai, hands, oldScores, deltaScores)
                 elif action_name == 'ActionAnGangAddGang':
-                    data = liqi_dict['data']['data']
+                    #暗杠加杠
                     type_ = data['type']
                     seat = data.get('seat', 0)
                     tiles = data['tiles']
                     return self.anGangAddGang(type_, seat, tiles)
                 elif action_name == 'ActionLiuJu':
+                    #开局流局
                     return self.newRoundButLiuju()
                 else:
                     raise NotImplementedError
@@ -219,19 +226,21 @@ class MajsoulHandler:
         assert(len(doras) == 1)
 
     @dump_args
-    def discardTile(self, seat: int, tile: str, moqie: bool, isLiqi: bool, doras: List[str], operation):
+    def newDora(self, dora: str):
+        """
+        tile:新增加的明宝牌
+        """
+        assert(dora in all_tiles)
+
+    @dump_args
+    def discardTile(self, seat: int, tile: str, moqie: bool, isLiqi: bool, operation):
         """
         seat:打牌的玩家
         tile:打出的手牌
         moqie:是否是摸切
         isLiqi:当回合是否出牌后立直
-        doras:上一家杠牌后记录所有明宝牌(其余时刻为[])
         operation:可选动作(吃碰杠)
         """
-
-        #discardTile (seat = 2, tile = '3m', operation = {'seat': 3, 'operationList': [{'type': 2, 'combination': ['4m|5m']}, {'type': 3, 'combination': ['3m|3m']}], 'timeFixed': 60000})
-        #终盘unknown {'id': 740, 'type': <MsgType.Notify: 1>, 'method': '.lq.ActionPrototype', 'data': {'step': 147, 'name': 'ActionNoTile', 'data': {'players': [{}, {}, {}, {'tingpai': True, 'hand': ['4m', '5m', '4s', '4s'], 'tings': [{'tile': '3m', 'haveyi': True, 'count': 1, 'fu': 30, 'biaoDoraCount': 5, 'countZimo': 1, 'fuZimo': 40}, {'tile': '6m', 'haveyi': True, 'count': 1, 'fu': 30, 'biaoDoraCount': 4, 'countZimo': 1, 'fuZimo': 40}]}], 'scores': [{'oldScores': [25000, 25000, 25000, 25000], 'deltaScores': [-1000, -1000, -1000, 3000]}]}}}
-        #我胡了unknown {'id': 1458, 'type': <MsgType.Notify: 1>, 'method': '.lq.ActionPrototype', 'data': {'step': 96, 'name': 'ActionHule', 'data': {'hules': [{'hand': ['0m', '5m', '5m', '8m', '9m', '4p', '5p', '6p', '6s', '6s'], 'ming': ['kezi(7z,7z,7z)'], 'huTile': '7m', 'seat': 3, 'doras': ['9p'], 'count': 2, 'fans': [{'val': 1, 'id': 9}, {'val': 1, 'id': 32}], 'fu': 30, 'pointRong': 2000, 'pointZimoQin': 1000, 'pointZimoXian': 500, 'pointSum': 2000}], 'oldScores': [24000, 24000, 24000, 28000], 'deltaScores': [0, 0, -2300, 2300], 'scores': [24000, 24000, 21700, 30300]}}}
         assert(0 <= seat < 4)
         assert(tile in all_tiles)
         if operation != None:
@@ -262,7 +271,6 @@ class MajsoulHandler:
         liqi:如果上一回合玩家出牌立直，则紧接着的摸牌阶段有此参数表示立直成功
         operation:可选操作列表(TODO)
         """
-        #iDealTile (seat = 3, tile = '3m', leftTileCount = 25, operation = {'seat': 3, 'operationList': [{'type': 1}, {'type': 6, 'combination': ['3m|3m|3m|3m']}], 'timeFixed': 60000}) 自摸加杠3m
         assert(seat == self.mySeat)
         assert(tile in all_tiles)
         assert(type(liqi) == dict or liqi == None)
