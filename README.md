@@ -100,8 +100,10 @@ $python liqi.py --load FILE # low level的解析FILE并打印至stdout
 |*iDealTile*|自己摸了一张牌|
 |*chiPengGang*|某玩家吃碰杠了|
 |*anGangAddGang*|某玩家暗杠加杠了|
+|*newDora*|出现杠而新增明宝牌|
 |*hule*|某玩家胡牌了|
-|*liuju*|流局了|
+|*liuju*|无牌流局|
+|*newRoundButLiuju*|开局流局(四风连打，九种九牌)|
 |*beginGame*|在整场比赛开始前调用|
 |*endGame*|在整场比赛结束后调用|
 
