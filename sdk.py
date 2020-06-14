@@ -97,7 +97,7 @@ class MajsoulHandler:
             if 'name' in liqi_dict['data']:
                 action_name = liqi_dict['data']['name']
                 data = liqi_dict['data'].get('data', {})
-                if action_name in ('ActionDiscardTile', 'ActionDealTile'):
+                if action_name in ('ActionDiscardTile', 'ActionDealTile', 'ActionAnGangAddGang'):
                     # 单独判断数据里是否有新的明宝牌
                     doras = data.get('doras', [])
                     if len(doras) > len(self.doras):
