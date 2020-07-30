@@ -23,12 +23,28 @@ message NotifyRoomPlayerReady {
 
     uint32 account_id = 1;
     bool ready = 2;
+    AccountReadyState account_list = 3;
+    uint32 seq = 4;
+
+    message AccountReadyState {
+
+        uint32 account_id = 1;
+        bool ready = 2;
+    }
 }
 
 message NotifyRoomPlayerDressing {
 
     uint32 account_id = 1;
     bool dressing = 2;
+    AccountDressingState account_list = 3;
+    uint32 seq = 4;
+
+    message AccountDressingState {
+
+        uint32 account_id = 1;
+        bool dressing = 2;
+    }
 }
 
 message NotifyRoomPlayerUpdate {
@@ -37,6 +53,8 @@ message NotifyRoomPlayerUpdate {
     repeated uint32 remove_list = 2;
     uint32 owner_id = 3;
     uint32 robot_count = 4;
+    repeated PlayerBaseView player_list = 5;
+    uint32 seq = 6;
 }
 
 message NotifyRoomKickOut {
@@ -130,6 +148,16 @@ message NotifyActivityPeriodTaskUpdate {
 message NotifyAccountRandomTaskUpdate {
 
     repeated TaskProgress progresses = 1;
+}
+
+message NotifyAccountChallengeTaskUpdate {
+
+    repeated TaskProgress progresses = 1;
+    uint32 level = 2;
+    uint32 refresh_count = 3;
+    uint32 match_count = 4;
+    uint32 ticket_id = 5;
+    repeated uint32 rewarded_season = 6;
 }
 
 message NotifyNewComment {
@@ -317,6 +345,7 @@ message AccountStatisticData {
     uint32 mahjong_category = 1;
     uint32 game_category = 2;
     AccountMahjongStatistic statistic = 3;
+    uint32 game_type = 4;
 }
 
 message AccountLevel {
@@ -357,6 +386,7 @@ message Account {
     uint32 skin_ticket = 24;
     repeated PlatformSkinTicket platform_skin_ticket = 25;
     uint32 verified = 26;
+    repeated ChallengeLevel challenge_levels = 27;
 
     message PlatformDiamond {
 
@@ -368,6 +398,12 @@ message Account {
 
         uint32 id = 1;
         uint32 count = 2;
+    }
+
+    message ChallengeLevel {
+
+        uint32 season = 1;
+        uint32 level = 2;
     }
 }
 
@@ -390,6 +426,7 @@ message AccountUpdate {
     TaskUpdate activity_flip_task = 10;
     TaskUpdate activity_period_task = 11;
     TaskUpdate activity_random_task = 12;
+    AccountChallengeUpdate challenge = 13;
 
     message NumericalUpdate {
 
@@ -413,6 +450,7 @@ message AccountUpdate {
     message DailyTaskUpdate {
 
         repeated TaskProgress progresses = 1;
+        repeated uint32 task_list = 2;
     }
 
     message TitleUpdate {
@@ -424,6 +462,18 @@ message AccountUpdate {
     message TaskUpdate {
 
         repeated TaskProgress progresses = 1;
+        repeated uint32 task_list = 2;
+    }
+
+    message AccountChallengeUpdate {
+
+        repeated TaskProgress progresses = 1;
+        uint32 level = 2;
+        uint32 refresh_count = 3;
+        uint32 match_count = 4;
+        uint32 ticket_id = 5;
+        repeated uint32 task_list = 6;
+        repeated uint32 rewarded_season = 7;
     }
 }
 
@@ -566,6 +616,7 @@ message Room {
     bool public_live = 8;
     uint32 robot_count = 9;
     uint32 tournament_id = 10;
+    uint32 seq = 11;
 }
 
 message GameEndResult {
@@ -739,6 +790,7 @@ message AccountDetailStatisticV2 {
     RankStatistic rank_statistic = 2;
     CustomizedContestStatistic customized_contest_statistic = 3;
     AccountDetailStatistic leisure_match_statistic = 4;
+    ChallengeStatistic challenge_match_statistic = 5;
 
     message RankStatistic {
 
@@ -764,6 +816,18 @@ message AccountDetailStatisticV2 {
         AccountDetailStatistic total_statistic = 1;
         AccountDetailStatistic month_statistic = 2;
         uint32 month_refresh_time = 3;
+    }
+
+    message ChallengeStatistic {
+
+        AccountDetailStatistic all_season = 1;
+        repeated SeasonData season_data_list = 2;
+
+        message SeasonData {
+
+            uint32 season_id = 1;
+            AccountDetailStatistic statistic = 2;
+        }
     }
 }
 
@@ -802,6 +866,7 @@ message TaskProgress {
     uint32 counter = 2;
     bool achieved = 3;
     bool rewarded = 4;
+    bool failed = 5;
 }
 
 message GameConfig {
@@ -1382,6 +1447,8 @@ service Lobby {
     rpc removeCollectedGameRecord (ReqRemoveCollectedGameRecord) returns (ResRemoveCollectedGameRecord);
     rpc changeCollectedGameRecordRemarks (ReqChangeCollectedGameRecordRemarks) returns (ResChangeCollectedGameRecordRemarks);
     rpc fetchLevelLeaderboard (ReqLevelLeaderboard) returns (ResLevelLeaderboard);
+    rpc fetchChallengeLeaderboard (ReqChallangeLeaderboard) returns (ResChallengeLeaderboard);
+    rpc fetchMutiChallengeLevel (ReqMutiChallengeLevel) returns (ResMutiChallengeLevel);
     rpc fetchMultiAccountBrief (ReqMultiAccountId) returns (ResMultiAccountBrief);
     rpc fetchFriendList (ReqCommon) returns (ResFriendList);
     rpc fetchFriendApplyList (ReqCommon) returns (ResFriendApplyList);
@@ -1485,6 +1552,8 @@ service Lobby {
     rpc createENAlipayOrder (ReqCreateENAlipayOrder) returns (ResCreateENAlipayOrder);
     rpc createDMMOrder (ReqCreateDMMOrder) returns (ResCreateDmmOrder);
     rpc createIAPOrder (ReqCreateIAPOrder) returns (ResCreateIAPOrder);
+    rpc createSteamOrder (ReqCreateSteamOrder) returns (ResCreateSteamOrder);
+    rpc verifySteamOrder (ReqVerifySteamOrder) returns (ResCommon);
     rpc createMyCardAndroidOrder (ReqCreateMyCardOrder) returns (ResCreateMyCardOrder);
     rpc createMyCardWebOrder (ReqCreateMyCardOrder) returns (ResCreateMyCardOrder);
     rpc verifyMyCardOrder (ReqVerifyMyCardOrder) returns (ResCommon);
@@ -1532,6 +1601,14 @@ service Lobby {
     rpc richmanActivityChestInfo (ReqRichmanChestInfo) returns (ResRichmanChestInfo);
     rpc createGameObserveAuth (ReqCreateGameObserveAuth) returns (ResCreateGameObserveAuth);
     rpc refreshGameObserveAuth (ReqRefreshGameObserveAuth) returns (ResRefreshGameObserveAuth);
+    rpc upgradeChallenge (ReqCommon) returns (ResUpgradeChallenge);
+    rpc refreshChallenge (ReqCommon) returns (ResRefreshChallenge);
+    rpc fetchChallengeInfo (ReqCommon) returns (ResFetchChallengeInfo);
+    rpc forceCompleteChallengeTask (ReqForceCompleteChallengeTask) returns (ResCommon);
+    rpc fetchChallengeSeason (ReqCommon) returns (ResChallengeSeasonInfo);
+    rpc receiveChallengeRankReward (ReqReceiveChallengeRankReward) returns (ResReceiveChallengeRankReward);
+    rpc startUnifiedMatch (ReqStartUnifiedMatch) returns (ResCommon);
+    rpc cancelUnifiedMatch (ReqCancelUnifiedMatch) returns (ResCommon);
 }
 
 message ResConnectionInfo {
@@ -1957,6 +2034,42 @@ message ResLevelLeaderboard {
 
         uint32 account_id = 1;
         AccountLevel level = 2;
+    }
+}
+
+message ReqChallangeLeaderboard {
+
+    uint32 season = 1;
+}
+
+message ResChallengeLeaderboard {
+
+    Error error = 1;
+    repeated Item items = 2;
+    uint32 self_rank = 3;
+
+    message Item {
+
+        uint32 account_id = 1;
+        uint32 level = 2;
+    }
+}
+
+message ReqMutiChallengeLevel {
+
+    repeated uint32 account_id_list = 1;
+    uint32 season = 2;
+}
+
+message ResMutiChallengeLevel {
+
+    Error error = 1;
+    repeated Item items = 2;
+
+    message Item {
+
+        uint32 account_id = 1;
+        uint32 level = 2;
     }
 }
 
@@ -2679,6 +2792,28 @@ message ResVerificationIAPOrder {
     Error error = 1;
 }
 
+message ReqCreateSteamOrder {
+
+    string language = 1;
+    uint32 account_id = 2;
+    uint32 client_type = 3;
+    uint32 goods_id = 4;
+    string steam_id = 5;
+}
+
+message ResCreateSteamOrder {
+
+    Error error = 1;
+    string order_id = 2;
+    string platform_order_id = 3;
+}
+
+message ReqVerifySteamOrder {
+
+    string order_id = 1;
+    uint32 account_id = 2;
+}
+
 message ReqCreateMyCardOrder {
 
     uint32 goods_id = 1;
@@ -3334,6 +3469,81 @@ message ResRefreshGameObserveAuth {
 
     Error error = 1;
     uint32 ttl = 2;
+}
+
+message ResUpgradeChallenge {
+
+    Error error = 1;
+    repeated TaskProgress task_progress = 2;
+    uint32 refresh_count = 3;
+    uint32 level = 4;
+    uint32 match_count = 5;
+    uint32 ticket_id = 6;
+}
+
+message ResRefreshChallenge {
+
+    Error error = 1;
+    repeated TaskProgress task_progress = 2;
+    uint32 refresh_count = 3;
+    uint32 level = 4;
+    uint32 match_count = 5;
+    uint32 ticket_id = 6;
+}
+
+message ResFetchChallengeInfo {
+
+    Error error = 1;
+    repeated TaskProgress task_progress = 2;
+    uint32 refresh_count = 3;
+    uint32 level = 4;
+    uint32 match_count = 5;
+    uint32 ticket_id = 6;
+    repeated uint32 rewarded_season = 7;
+}
+
+message ReqForceCompleteChallengeTask {
+
+    uint32 task_id = 1;
+}
+
+message ReqStartUnifiedMatch {
+
+    string match_sid = 1;
+}
+
+message ReqCancelUnifiedMatch {
+
+    string match_sid = 1;
+}
+
+message ResChallengeSeasonInfo {
+
+    repeated ChallengeInfo challenge_season_list = 1;
+
+    message ChallengeInfo {
+
+        uint32 season_id = 1;
+        uint32 start_time = 2;
+        uint32 end_time = 3;
+        uint32 state = 4;
+    }
+}
+
+message ReqReceiveChallengeRankReward {
+
+    uint32 season_id = 1;
+}
+
+message ResReceiveChallengeRankReward {
+
+    repeated Reward rewards = 1;
+
+    message Reward {
+
+        uint32 resource_id = 1;
+        uint32 count = 2;
+    }
 }
 
 message ActionMJStart {

@@ -55,6 +55,28 @@
                         "ready": {
                             "type": "bool",
                             "id": 2
+                        },
+                        "account_list": {
+                            "type": "AccountReadyState",
+                            "id": 3
+                        },
+                        "seq": {
+                            "type": "uint32",
+                            "id": 4
+                        }
+                    },
+                    "nested": {
+                        "AccountReadyState": {
+                            "fields": {
+                                "account_id": {
+                                    "type": "uint32",
+                                    "id": 1
+                                },
+                                "ready": {
+                                    "type": "bool",
+                                    "id": 2
+                                }
+                            }
                         }
                     }
                 },
@@ -67,6 +89,28 @@
                         "dressing": {
                             "type": "bool",
                             "id": 2
+                        },
+                        "account_list": {
+                            "type": "AccountDressingState",
+                            "id": 3
+                        },
+                        "seq": {
+                            "type": "uint32",
+                            "id": 4
+                        }
+                    },
+                    "nested": {
+                        "AccountDressingState": {
+                            "fields": {
+                                "account_id": {
+                                    "type": "uint32",
+                                    "id": 1
+                                },
+                                "dressing": {
+                                    "type": "bool",
+                                    "id": 2
+                                }
+                            }
                         }
                     }
                 },
@@ -89,6 +133,15 @@
                         "robot_count": {
                             "type": "uint32",
                             "id": 4
+                        },
+                        "player_list": {
+                            "rule": "repeated",
+                            "type": "PlayerBaseView",
+                            "id": 5
+                        },
+                        "seq": {
+                            "type": "uint32",
+                            "id": 6
                         }
                     }
                 },
@@ -264,6 +317,36 @@
                             "rule": "repeated",
                             "type": "TaskProgress",
                             "id": 1
+                        }
+                    }
+                },
+                "NotifyAccountChallengeTaskUpdate": {
+                    "fields": {
+                        "progresses": {
+                            "rule": "repeated",
+                            "type": "TaskProgress",
+                            "id": 1
+                        },
+                        "level": {
+                            "type": "uint32",
+                            "id": 2
+                        },
+                        "refresh_count": {
+                            "type": "uint32",
+                            "id": 3
+                        },
+                        "match_count": {
+                            "type": "uint32",
+                            "id": 4
+                        },
+                        "ticket_id": {
+                            "type": "uint32",
+                            "id": 5
+                        },
+                        "rewarded_season": {
+                            "rule": "repeated",
+                            "type": "uint32",
+                            "id": 6
                         }
                     }
                 },
@@ -698,6 +781,10 @@
                         "statistic": {
                             "type": "AccountMahjongStatistic",
                             "id": 3
+                        },
+                        "game_type": {
+                            "type": "uint32",
+                            "id": 4
                         }
                     }
                 },
@@ -824,6 +911,11 @@
                         "verified": {
                             "type": "uint32",
                             "id": 26
+                        },
+                        "challenge_levels": {
+                            "rule": "repeated",
+                            "type": "ChallengeLevel",
+                            "id": 27
                         }
                     },
                     "nested": {
@@ -846,6 +938,18 @@
                                     "id": 1
                                 },
                                 "count": {
+                                    "type": "uint32",
+                                    "id": 2
+                                }
+                            }
+                        },
+                        "ChallengeLevel": {
+                            "fields": {
+                                "season": {
+                                    "type": "uint32",
+                                    "id": 1
+                                },
+                                "level": {
                                     "type": "uint32",
                                     "id": 2
                                 }
@@ -913,6 +1017,10 @@
                         "activity_random_task": {
                             "type": "TaskUpdate",
                             "id": 12
+                        },
+                        "challenge": {
+                            "type": "AccountChallengeUpdate",
+                            "id": 13
                         }
                     },
                     "nested": {
@@ -967,6 +1075,11 @@
                                     "rule": "repeated",
                                     "type": "TaskProgress",
                                     "id": 1
+                                },
+                                "task_list": {
+                                    "rule": "repeated",
+                                    "type": "uint32",
+                                    "id": 2
                                 }
                             }
                         },
@@ -990,6 +1103,46 @@
                                     "rule": "repeated",
                                     "type": "TaskProgress",
                                     "id": 1
+                                },
+                                "task_list": {
+                                    "rule": "repeated",
+                                    "type": "uint32",
+                                    "id": 2
+                                }
+                            }
+                        },
+                        "AccountChallengeUpdate": {
+                            "fields": {
+                                "progresses": {
+                                    "rule": "repeated",
+                                    "type": "TaskProgress",
+                                    "id": 1
+                                },
+                                "level": {
+                                    "type": "uint32",
+                                    "id": 2
+                                },
+                                "refresh_count": {
+                                    "type": "uint32",
+                                    "id": 3
+                                },
+                                "match_count": {
+                                    "type": "uint32",
+                                    "id": 4
+                                },
+                                "ticket_id": {
+                                    "type": "uint32",
+                                    "id": 5
+                                },
+                                "task_list": {
+                                    "rule": "repeated",
+                                    "type": "uint32",
+                                    "id": 6
+                                },
+                                "rewarded_season": {
+                                    "rule": "repeated",
+                                    "type": "uint32",
+                                    "id": 7
                                 }
                             }
                         }
@@ -1451,6 +1604,10 @@
                         "tournament_id": {
                             "type": "uint32",
                             "id": 10
+                        },
+                        "seq": {
+                            "type": "uint32",
+                            "id": 11
                         }
                     }
                 },
@@ -1887,6 +2044,10 @@
                         "leisure_match_statistic": {
                             "type": "AccountDetailStatistic",
                             "id": 4
+                        },
+                        "challenge_match_statistic": {
+                            "type": "ChallengeStatistic",
+                            "id": 5
                         }
                     },
                     "nested": {
@@ -1948,6 +2109,33 @@
                                 "month_refresh_time": {
                                     "type": "uint32",
                                     "id": 3
+                                }
+                            }
+                        },
+                        "ChallengeStatistic": {
+                            "fields": {
+                                "all_season": {
+                                    "type": "AccountDetailStatistic",
+                                    "id": 1
+                                },
+                                "season_data_list": {
+                                    "rule": "repeated",
+                                    "type": "SeasonData",
+                                    "id": 2
+                                }
+                            },
+                            "nested": {
+                                "SeasonData": {
+                                    "fields": {
+                                        "season_id": {
+                                            "type": "uint32",
+                                            "id": 1
+                                        },
+                                        "statistic": {
+                                            "type": "AccountDetailStatistic",
+                                            "id": 2
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -2026,6 +2214,10 @@
                         "rewarded": {
                             "type": "bool",
                             "id": 4
+                        },
+                        "failed": {
+                            "type": "bool",
+                            "id": 5
                         }
                     }
                 },
@@ -3655,6 +3847,14 @@
                             "requestType": "ReqLevelLeaderboard",
                             "responseType": "ResLevelLeaderboard"
                         },
+                        "fetchChallengeLeaderboard": {
+                            "requestType": "ReqChallangeLeaderboard",
+                            "responseType": "ResChallengeLeaderboard"
+                        },
+                        "fetchMutiChallengeLevel": {
+                            "requestType": "ReqMutiChallengeLevel",
+                            "responseType": "ResMutiChallengeLevel"
+                        },
                         "fetchMultiAccountBrief": {
                             "requestType": "ReqMultiAccountId",
                             "responseType": "ResMultiAccountBrief"
@@ -4067,6 +4267,14 @@
                             "requestType": "ReqCreateIAPOrder",
                             "responseType": "ResCreateIAPOrder"
                         },
+                        "createSteamOrder": {
+                            "requestType": "ReqCreateSteamOrder",
+                            "responseType": "ResCreateSteamOrder"
+                        },
+                        "verifySteamOrder": {
+                            "requestType": "ReqVerifySteamOrder",
+                            "responseType": "ResCommon"
+                        },
                         "createMyCardAndroidOrder": {
                             "requestType": "ReqCreateMyCardOrder",
                             "responseType": "ResCreateMyCardOrder"
@@ -4254,6 +4462,38 @@
                         "refreshGameObserveAuth": {
                             "requestType": "ReqRefreshGameObserveAuth",
                             "responseType": "ResRefreshGameObserveAuth"
+                        },
+                        "upgradeChallenge": {
+                            "requestType": "ReqCommon",
+                            "responseType": "ResUpgradeChallenge"
+                        },
+                        "refreshChallenge": {
+                            "requestType": "ReqCommon",
+                            "responseType": "ResRefreshChallenge"
+                        },
+                        "fetchChallengeInfo": {
+                            "requestType": "ReqCommon",
+                            "responseType": "ResFetchChallengeInfo"
+                        },
+                        "forceCompleteChallengeTask": {
+                            "requestType": "ReqForceCompleteChallengeTask",
+                            "responseType": "ResCommon"
+                        },
+                        "fetchChallengeSeason": {
+                            "requestType": "ReqCommon",
+                            "responseType": "ResChallengeSeasonInfo"
+                        },
+                        "receiveChallengeRankReward": {
+                            "requestType": "ReqReceiveChallengeRankReward",
+                            "responseType": "ResReceiveChallengeRankReward"
+                        },
+                        "startUnifiedMatch": {
+                            "requestType": "ReqStartUnifiedMatch",
+                            "responseType": "ResCommon"
+                        },
+                        "cancelUnifiedMatch": {
+                            "requestType": "ReqCancelUnifiedMatch",
+                            "responseType": "ResCommon"
                         }
                     }
                 },
@@ -5145,6 +5385,85 @@
                                 },
                                 "level": {
                                     "type": "AccountLevel",
+                                    "id": 2
+                                }
+                            }
+                        }
+                    }
+                },
+                "ReqChallangeLeaderboard": {
+                    "fields": {
+                        "season": {
+                            "type": "uint32",
+                            "id": 1
+                        }
+                    }
+                },
+                "ResChallengeLeaderboard": {
+                    "fields": {
+                        "error": {
+                            "type": "Error",
+                            "id": 1
+                        },
+                        "items": {
+                            "rule": "repeated",
+                            "type": "Item",
+                            "id": 2
+                        },
+                        "self_rank": {
+                            "type": "uint32",
+                            "id": 3
+                        }
+                    },
+                    "nested": {
+                        "Item": {
+                            "fields": {
+                                "account_id": {
+                                    "type": "uint32",
+                                    "id": 1
+                                },
+                                "level": {
+                                    "type": "uint32",
+                                    "id": 2
+                                }
+                            }
+                        }
+                    }
+                },
+                "ReqMutiChallengeLevel": {
+                    "fields": {
+                        "account_id_list": {
+                            "rule": "repeated",
+                            "type": "uint32",
+                            "id": 1
+                        },
+                        "season": {
+                            "type": "uint32",
+                            "id": 2
+                        }
+                    }
+                },
+                "ResMutiChallengeLevel": {
+                    "fields": {
+                        "error": {
+                            "type": "Error",
+                            "id": 1
+                        },
+                        "items": {
+                            "rule": "repeated",
+                            "type": "Item",
+                            "id": 2
+                        }
+                    },
+                    "nested": {
+                        "Item": {
+                            "fields": {
+                                "account_id": {
+                                    "type": "uint32",
+                                    "id": 1
+                                },
+                                "level": {
+                                    "type": "uint32",
                                     "id": 2
                                 }
                             }
@@ -6742,6 +7061,58 @@
                         }
                     }
                 },
+                "ReqCreateSteamOrder": {
+                    "fields": {
+                        "language": {
+                            "type": "string",
+                            "id": 1
+                        },
+                        "account_id": {
+                            "type": "uint32",
+                            "id": 2
+                        },
+                        "client_type": {
+                            "type": "uint32",
+                            "id": 3
+                        },
+                        "goods_id": {
+                            "type": "uint32",
+                            "id": 4
+                        },
+                        "steam_id": {
+                            "type": "string",
+                            "id": 5
+                        }
+                    }
+                },
+                "ResCreateSteamOrder": {
+                    "fields": {
+                        "error": {
+                            "type": "Error",
+                            "id": 1
+                        },
+                        "order_id": {
+                            "type": "string",
+                            "id": 2
+                        },
+                        "platform_order_id": {
+                            "type": "string",
+                            "id": 3
+                        }
+                    }
+                },
+                "ReqVerifySteamOrder": {
+                    "fields": {
+                        "order_id": {
+                            "type": "string",
+                            "id": 1
+                        },
+                        "account_id": {
+                            "type": "uint32",
+                            "id": 2
+                        }
+                    }
+                },
                 "ReqCreateMyCardOrder": {
                     "fields": {
                         "goods_id": {
@@ -8173,6 +8544,184 @@
                         "ttl": {
                             "type": "uint32",
                             "id": 2
+                        }
+                    }
+                },
+                "ResUpgradeChallenge": {
+                    "fields": {
+                        "error": {
+                            "type": "Error",
+                            "id": 1
+                        },
+                        "task_progress": {
+                            "rule": "repeated",
+                            "type": "TaskProgress",
+                            "id": 2
+                        },
+                        "refresh_count": {
+                            "type": "uint32",
+                            "id": 3
+                        },
+                        "level": {
+                            "type": "uint32",
+                            "id": 4
+                        },
+                        "match_count": {
+                            "type": "uint32",
+                            "id": 5
+                        },
+                        "ticket_id": {
+                            "type": "uint32",
+                            "id": 6
+                        }
+                    }
+                },
+                "ResRefreshChallenge": {
+                    "fields": {
+                        "error": {
+                            "type": "Error",
+                            "id": 1
+                        },
+                        "task_progress": {
+                            "rule": "repeated",
+                            "type": "TaskProgress",
+                            "id": 2
+                        },
+                        "refresh_count": {
+                            "type": "uint32",
+                            "id": 3
+                        },
+                        "level": {
+                            "type": "uint32",
+                            "id": 4
+                        },
+                        "match_count": {
+                            "type": "uint32",
+                            "id": 5
+                        },
+                        "ticket_id": {
+                            "type": "uint32",
+                            "id": 6
+                        }
+                    }
+                },
+                "ResFetchChallengeInfo": {
+                    "fields": {
+                        "error": {
+                            "type": "Error",
+                            "id": 1
+                        },
+                        "task_progress": {
+                            "rule": "repeated",
+                            "type": "TaskProgress",
+                            "id": 2
+                        },
+                        "refresh_count": {
+                            "type": "uint32",
+                            "id": 3
+                        },
+                        "level": {
+                            "type": "uint32",
+                            "id": 4
+                        },
+                        "match_count": {
+                            "type": "uint32",
+                            "id": 5
+                        },
+                        "ticket_id": {
+                            "type": "uint32",
+                            "id": 6
+                        },
+                        "rewarded_season": {
+                            "rule": "repeated",
+                            "type": "uint32",
+                            "id": 7
+                        }
+                    }
+                },
+                "ReqForceCompleteChallengeTask": {
+                    "fields": {
+                        "task_id": {
+                            "type": "uint32",
+                            "id": 1
+                        }
+                    }
+                },
+                "ReqStartUnifiedMatch": {
+                    "fields": {
+                        "match_sid": {
+                            "type": "string",
+                            "id": 1
+                        }
+                    }
+                },
+                "ReqCancelUnifiedMatch": {
+                    "fields": {
+                        "match_sid": {
+                            "type": "string",
+                            "id": 1
+                        }
+                    }
+                },
+                "ResChallengeSeasonInfo": {
+                    "fields": {
+                        "challenge_season_list": {
+                            "rule": "repeated",
+                            "type": "ChallengeInfo",
+                            "id": 1
+                        }
+                    },
+                    "nested": {
+                        "ChallengeInfo": {
+                            "fields": {
+                                "season_id": {
+                                    "type": "uint32",
+                                    "id": 1
+                                },
+                                "start_time": {
+                                    "type": "uint32",
+                                    "id": 2
+                                },
+                                "end_time": {
+                                    "type": "uint32",
+                                    "id": 3
+                                },
+                                "state": {
+                                    "type": "uint32",
+                                    "id": 4
+                                }
+                            }
+                        }
+                    }
+                },
+                "ReqReceiveChallengeRankReward": {
+                    "fields": {
+                        "season_id": {
+                            "type": "uint32",
+                            "id": 1
+                        }
+                    }
+                },
+                "ResReceiveChallengeRankReward": {
+                    "fields": {
+                        "rewards": {
+                            "rule": "repeated",
+                            "type": "Reward",
+                            "id": 1
+                        }
+                    },
+                    "nested": {
+                        "Reward": {
+                            "fields": {
+                                "resource_id": {
+                                    "type": "uint32",
+                                    "id": 1
+                                },
+                                "count": {
+                                    "type": "uint32",
+                                    "id": 2
+                                }
+                            }
                         }
                     }
                 },
