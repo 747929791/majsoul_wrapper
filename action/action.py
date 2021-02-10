@@ -12,7 +12,7 @@ from .classifier import Classify
 from ..sdk import Operation
 
 pyautogui.PAUSE = 0         # 函数执行后暂停时间
-pyautogui.FAILSAFE = True   # 开启鼠标移动到左上角自动退出
+pyautogui.FAILSAFE = False   # 开启鼠标移动到左上角自动退出
 
 DEBUG = False               # 是否显示检测中间结果
 
@@ -335,7 +335,7 @@ class GUIInterface:
         # 在终局以后点击确定跳转回菜单主界面
         x, y = np.int32(PosTransfer((1785, 1003), self.M))  # 终局确认按钮
         while True:
-            time.sleep(10)
+            time.sleep(5)
             x0, y0 = np.int32(PosTransfer([0, 0], self.M))
             x1, y1 = np.int32(PosTransfer(Layout.size, self.M))
             img = screenShot()
@@ -343,6 +343,7 @@ class GUIInterface:
             if S > 0.5:
                 return True
             else:
+                print('Similarity:', S)
                 pyautogui.click(x=x, y=y, duration=0.5)
 
     def actionBeginGame(self, level: int):
