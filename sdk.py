@@ -64,10 +64,13 @@ class MajsoulHandler:
         '.lq.FastTest.confirmNewRound',         # 确认下一轮
         '.lq.PlayerLeaving',                    # 用户离线
         '.lq.FastTest.clearLeaving',            # 用户离线后上线
-        '.lq.NotifyGameEndResult',
+        #'.lq.NotifyGameEndResult',
         '.lq.NotifyGameFinishReward',
         '.lq.NotifyActivityReward',
         '.lq.NotifyLeaderboardPoint',
+        '.lq.FastTest.broadcastInGame',         # 表情
+        '.lq.NotifyGameBroadcast',              # 表情
+        '.lq.NotifyPlayerConnectionState',
     }
 
     no_effect_action = {
@@ -76,6 +79,7 @@ class MajsoulHandler:
 
     isMajsoulReady = False                      # Majsoul是否处于对局中
     isEnd = False                               # Majsoul刚刚结束一场对局
+    finalScore = None
 
     def parse(self, liqi_dict):
         method = liqi_dict['method']
@@ -92,7 +96,9 @@ class MajsoulHandler:
                 self.doras = []
                 return self.authGame(self.accountId, self.seatList)
         elif method == '.lq.NotifyGameEndResult':
+            self.finalScore = [i['partPoint1'] for i in liqi_dict['data']['result']['players']]
             self.endGame()
+            return
         elif method == '.lq.ActionPrototype':
             if 'name' in liqi_dict['data']:
                 action_name = liqi_dict['data']['name']
