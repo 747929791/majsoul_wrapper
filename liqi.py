@@ -36,7 +36,7 @@ class LiqiProto:
         # (method_name:str,pb.MethodObj) for 256 sliding windows; req->res
         self.res_type = dict()  # int -> (method_name,pb2obj)
         self.jsonProto = json.load(
-            open(os.path.join(os.path.dirname(__file__), 'proto\liqi.json'), 'r'))
+            open(os.path.join(os.path.dirname(__file__), 'proto/liqi.json'), 'r'))
 
     def init(self):
         self.tot = 0
