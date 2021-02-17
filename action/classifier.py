@@ -90,7 +90,7 @@ class Classify:
     def __init__(self):
         self.model = model = TileNet()
         path = os.path.join(os.path.dirname(__file__), 'tile.model')
-        self.model.load_state_dict(torch.load(path))
+        self.model.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
         self.model.to(device)
         self.__call__(np.ones((32, 32, 3), dtype=np.uint8))  # load cache
 
