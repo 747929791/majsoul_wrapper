@@ -159,6 +159,9 @@ class GUIInterface:
         root = os.path.dirname(__file__)
         def load(name): return cv2.imread(join(root, 'template', name))
         self.menuImg = load('menu.png')         # 初始菜单界面
+        if (type(self.menuImg)==type(None)):
+            raise FileNotFoundError("menu.png not found, please check the Chinese path")
+        assert(self.menuImg.shape == (1080, 1920, 3))
         self.chiImg = load('chi.png')
         self.pengImg = load('peng.png')
         self.gangImg = load('gang.png')
