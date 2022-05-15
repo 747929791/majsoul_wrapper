@@ -195,6 +195,7 @@ $npm install -g protobufjs
 $pbjs -t proto3 liqi.json > liqi.proto
 ```
 然后使用protobuf将liqi.proto编译为liqi_pb2.py将旧版proto替换即可。
+>注意,本项目使用protobuf==3.10.0，你同样应该使用[这个版本](https://github.com/protocolbuffers/protobuf/releases?expanded=true&page=7)提供的protoc
 ```
 protoc --python_out=. liqi.proto
 ```
