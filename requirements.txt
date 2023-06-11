@@ -1,0 +1,6 @@
+mitmproxy==6.0.2
+numpy>=1.14.5
+opencv-python>=4.5.1.48
+PyAutoGUI>=0.9.52
+scipy>=1.5.4
+selenium>=3.141.0
