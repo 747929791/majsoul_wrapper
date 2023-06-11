@@ -294,6 +294,9 @@ message NotifyAFKResult {
     string game_uuid = 3;
 }
 
+message NotifyLoginQueueFinished {
+}
+
 message NotifyGameFinishRewardV2 {
 
     uint32 mode_id = 1;
@@ -481,6 +484,8 @@ message ViewSlot {
 
     uint32 slot = 1;
     uint32 item_id = 2;
+    uint32 type = 3;
+    repeated uint32 item_id_list = 4;
 }
 
 message Account {
@@ -512,6 +517,7 @@ message Account {
     repeated ChallengeLevel challenge_levels = 27;
     repeated AchievementCount achievement_count = 28;
     uint32 frozen_state = 29;
+    repeated uint32 loading_image = 30;
 
     message PlatformDiamond {
 
@@ -775,7 +781,17 @@ message GameDetailRule {
     uint32 chuanma = 50;
     uint32 reveal_discard = 51;
     uint32 field_spell_mode = 52;
+    uint32 zhanxing = 53;
+    uint32 tianming_mode = 54;
     bool disable_leijiyiman = 60;
+    uint32 disable_double_yakuman = 62;
+    uint32 disable_composite_yakuman = 63;
+    uint32 enable_shiti = 64;
+    uint32 enable_nontsumo_liqi = 65;
+    uint32 disable_double_wind_four_fu = 66;
+    uint32 disable_angang_guoshi = 67;
+    uint32 enable_renhe = 68;
+    uint32 enable_baopai_extend_settings = 69;
 }
 
 message Room {
@@ -906,6 +922,7 @@ message Mail {
     uint32 reference_id = 9;
     repeated I18nContext title_i18n = 10;
     repeated I18nContext content_i18n = 11;
+    uint32 template_id = 12;
 }
 
 message AchievementProgress {
@@ -1064,6 +1081,7 @@ message Announcement {
     uint32 id = 1;
     string title = 2;
     string content = 3;
+    string header_image = 4;
 }
 
 message TaskProgress {
@@ -1097,6 +1115,7 @@ message RPGActivity {
     RPGState current_state = 7;
     RPGState last_show_state = 8;
     repeated uint32 received_rewards = 9;
+    uint32 last_show_id = 10;
 }
 
 message ActivityArenaData {
@@ -1159,6 +1178,10 @@ message AccountActivityUpdate {
     repeated lq.MineActivityData mine_data = 1;
     repeated lq.RPGActivity rpg_data = 2;
     repeated ActivityFeedData feed_data = 3;
+    repeated lq.ActivitySpotData spot_data = 4;
+    repeated lq.ActivityFriendGiftData friend_gift_data = 5;
+    repeated lq.ActivityUpgradeData upgrade_data = 6;
+    repeated lq.ActivityGachaUpdateData gacha_data = 7;
 }
 
 message ActivityFeedData {
@@ -1184,6 +1207,77 @@ message ActivityFeedData {
         uint32 from_account_id = 4;
         uint32 time = 5;
         uint32 received = 6;
+    }
+}
+
+message ActivityFriendGiftData {
+
+    uint32 activity_id = 1;
+    uint32 max_inbox_id = 2;
+    CountWithTimeData receive_data = 3;
+    CountWithTimeData send_data = 4;
+    repeated GiftBoxData gift_inbox = 5;
+
+    message CountWithTimeData {
+
+        uint32 count = 1;
+        uint32 last_update_time = 2;
+        repeated uint32 send_friend_id = 3;
+    }
+
+    message GiftBoxData {
+
+        uint32 id = 1;
+        uint32 item_id = 2;
+        uint32 count = 3;
+        uint32 from_account_id = 4;
+        uint32 time = 5;
+        uint32 received = 6;
+    }
+}
+
+message ActivityUpgradeData {
+
+    uint32 activity_id = 1;
+    repeated LevelGroup groups = 2;
+    uint32 received_level = 3;
+
+    message LevelGroup {
+
+        uint32 group_id = 1;
+        uint32 level = 2;
+    }
+}
+
+message GachaRecord {
+
+    uint32 id = 1;
+    uint32 count = 2;
+}
+
+message ActivityGachaData {
+
+    uint32 activity_id = 1;
+    repeated GachaRecord gained = 2;
+}
+
+message ActivityGachaUpdateData {
+
+    uint32 activity_id = 1;
+    repeated GachaRecord gained = 2;
+    uint32 remain_count = 3;
+}
+
+message ActivitySpotData {
+
+    uint32 activity_id = 1;
+    repeated SpotData spots = 3;
+
+    message SpotData {
+
+        uint32 unique_id = 1;
+        uint32 rewarded = 2;
+        repeated uint32 unlocked_ending = 3;
     }
 }
 
@@ -1386,6 +1480,7 @@ message PaymentSettingV2 {
         string goods_click_text = 4;
         PaymentMaintain maintain = 5;
         bool enable_for_frozen_account = 6;
+        string extra_data = 7;
     }
 }
 
@@ -1430,6 +1525,7 @@ message ChestDataV2 {
     uint32 chest_id = 1;
     uint32 total_open_count = 2;
     uint32 face_black_count = 3;
+    uint32 ticket_face_black_count = 4;
 }
 
 message FaithData {
@@ -1492,6 +1588,7 @@ message CustomizedContestDetail {
     uint32 observer_switch = 13;
     uint32 emoji_switch = 14;
     uint32 contest_type = 15;
+    uint32 disable_broadcast = 16;
 }
 
 message CustomizedContestPlayerReport {
@@ -1736,6 +1833,19 @@ message ContestDetailRule {
     bool disable_multi_yukaman = 40;
     uint32 guyi_mode = 41;
     bool disable_leijiyiman = 42;
+    uint32 dora3_mode = 43;
+    uint32 xuezhandaodi = 44;
+    uint32 huansanzhang = 45;
+    uint32 chuanma = 46;
+    uint32 disable_double_yakuman = 62;
+    uint32 disable_composite_yakuman = 63;
+    uint32 enable_shiti = 64;
+    uint32 enable_nontsumo_liqi = 65;
+    uint32 disable_double_wind_four_fu = 66;
+    uint32 disable_angang_guoshi = 67;
+    uint32 enable_renhe = 68;
+    uint32 enable_baopai_extend_settings = 69;
+    uint32 fanfu = 70;
 }
 
 message ContestDetailRuleV2 {
@@ -1804,6 +1914,7 @@ message RecordHuleInfo {
     bool is_jue_zhang = 19;
     uint32 xun = 20;
     uint32 ting_type = 21;
+    uint32 ting_mian = 22;
 
     message RecordFanInfo {
 
@@ -1884,8 +1995,169 @@ message RecordAnalysisedData {
 
     repeated RecordRoundInfo round_infos = 1;
 }
+
+message VoteData {
+
+    uint32 activity_id = 1;
+    uint32 vote = 2;
+    uint32 count = 3;
+}
+
+message ActivityBuffData {
+
+    uint32 buff_id = 1;
+    uint32 level = 5;
+}
+
+message AccountResourceSnapshot {
+
+    repeated BagItemSnapshot bag_item = 1;
+    repeated CurrencySnapshot currency = 2;
+    TitleSnapshot title = 3;
+    UsedTitleSnapshot used_title = 4;
+
+    message BagItemSnapshot {
+
+        uint32 resource_id = 1;
+        uint32 resource_count = 2;
+        uint32 resource_version = 3;
+    }
+
+    message CurrencySnapshot {
+
+        uint32 currency_id = 1;
+        uint32 currency_count = 2;
+    }
+
+    message TitleSnapshot {
+
+        repeated uint32 title_list = 1;
+    }
+
+    message UsedTitleSnapshot {
+
+        uint32 title_id = 1;
+    }
+}
+
+message AccountCharacterSnapshot {
+
+    repeated uint32 created_characters = 1;
+    repeated Character removed_characters = 2;
+    repeated Character modified_characters = 3;
+    MainCharacterSnapshot main_character = 4;
+    SkinsSnapshot skins = 5;
+    HiddenCharacter hidden_characters = 6;
+
+    message MainCharacterSnapshot {
+
+        uint32 character_id = 1;
+    }
+
+    message SkinsSnapshot {
+
+        repeated uint32 skin_list = 1;
+    }
+
+    message HiddenCharacter {
+
+        repeated uint32 hidden_list = 1;
+    }
+}
+
+message AccountMailRecord {
+
+    repeated uint32 created_mails = 1;
+    repeated MailSnapshot removed_mails = 2;
+    repeated MailSnapshot modified_mails = 3;
+
+    message MailSnapshot {
+
+        uint32 mail_id = 1;
+        uint32 reference_id = 2;
+        uint32 create_time = 3;
+        uint32 expire_time = 4;
+        uint32 take_attachment = 5;
+        repeated RewardSlot attachments = 6;
+    }
+}
+
+message AccountAchievementSnapshot {
+
+    repeated AchievementProgress achievements = 1;
+    RewardedGroupSnapshot rewarded_group = 2;
+    AchievementVersion version = 3;
+
+    message RewardedGroupSnapshot {
+
+        uint32 rewarded_id = 1;
+    }
+
+    message AchievementVersion {
+
+        uint32 version = 1;
+    }
+}
+
+message AccountMiscSnapshot {
+
+    FaithData faith_data = 1;
+    AccountVIPRewardSnapshot vip_reward_gained = 2;
+    AccountVIP vip = 3;
+    ShopInfo shop_info = 4;
+    AccountMonthTicketSnapshot month_ticket = 5;
+
+    message AccountVIPRewardSnapshot {
+
+        repeated uint32 rewarded = 1;
+    }
+
+    message MonthTicketInfo {
+
+        uint32 id = 1;
+        uint32 end_time = 2;
+        uint32 last_pay_time = 3;
+        uint32 record_start_time = 4;
+        repeated uint32 history = 5;
+    }
+
+    message AccountMonthTicketSnapshot {
+
+        repeated MonthTicketInfo tickets = 1;
+    }
+
+    message AccountVIP {
+
+        uint32 vip = 1;
+    }
+}
+
+message AccountGiftCodeRecord {
+
+    repeated string used_gift_code = 1;
+}
+
+message AccSn {
+
+    AccountResourceSnapshot resource = 1;
+    AccountCharacterSnapshot character = 2;
+    AccountMailRecord mail = 3;
+    AccountAchievementSnapshot achievement = 4;
+    AccountMiscSnapshot misc = 5;
+    AccountGiftCodeRecord gift_code = 6;
+}
+
+message AccSnDa {
+
+    uint32 account_id = 1;
+    uint32 time = 2;
+    bytes snapshot = 3;
+}
 service Lobby {
     rpc fetchConnectionInfo (ReqCommon) returns (ResConnectionInfo);
+    rpc fetchQueueInfo (ReqCommon) returns (ResFetchQueueInfo);
+    rpc cancelQueue (ReqCommon) returns (ResCommon);
+    rpc openidCheck (ReqOpenidCheck) returns (ResOauth2Check);
     rpc signup (ReqSignupAccount) returns (ResSignupAccount);
     rpc login (ReqLogin) returns (ResLogin);
     rpc loginSuccess (ReqCommon) returns (ResCommon);
@@ -2043,11 +2315,18 @@ service Lobby {
     rpc createJPDocomoOrder (ReqCreateJPDocomoOrder) returns (ResCreateJPDocomoOrder);
     rpc createJPWebMoneyOrder (ReqCreateJPWebMoneyOrder) returns (ResCreateJPWebMoneyOrder);
     rpc createJPSoftbankOrder (ReqCreateJPSoftbankOrder) returns (ResCreateJPSoftbankOrder);
+    rpc createJPPayPayOrder (ReqCreateJPPayPayOrder) returns (ResCreateJPPayPayOrder);
+    rpc fetchJPCommonCreditCardOrder (ReqFetchJPCommonCreditCardOrder) returns (ResFetchJPCommonCreditCardOrder);
     rpc createENPaypalOrder (ReqCreateENPaypalOrder) returns (ResCreateENPaypalOrder);
     rpc createENMasterCardOrder (ReqCreateENMasterCardOrder) returns (ResCreateENMasterCardOrder);
     rpc createENVisaOrder (ReqCreateENVisaOrder) returns (ResCreateENVisaOrder);
     rpc createENJCBOrder (ReqCreateENJCBOrder) returns (ResCreateENJCBOrder);
     rpc createENAlipayOrder (ReqCreateENAlipayOrder) returns (ResCreateENAlipayOrder);
+    rpc createKRPaypalOrder (ReqCreateKRPaypalOrder) returns (ResCreateKRPaypalOrder);
+    rpc createKRMasterCardOrder (ReqCreateKRMasterCardOrder) returns (ResCreateKRMasterCardOrder);
+    rpc createKRVisaOrder (ReqCreateKRVisaOrder) returns (ResCreateKRVisaOrder);
+    rpc createKRJCBOrder (ReqCreateKRJCBOrder) returns (ResCreateKRJCBOrder);
+    rpc createKRAlipayOrder (ReqCreateKRAlipayOrder) returns (ResCreateKRAlipayOrder);
     rpc createDMMOrder (ReqCreateDMMOrder) returns (ResCreateDmmOrder);
     rpc createIAPOrder (ReqCreateIAPOrder) returns (ResCreateIAPOrder);
     rpc createSteamOrder (ReqCreateSteamOrder) returns (ResCreateSteamOrder);
@@ -2062,6 +2341,7 @@ service Lobby {
     rpc createBillingOrder (ReqCreateBillingOrder) returns (ResCreateBillingOrder);
     rpc solveGooglePlayOrder (ReqSolveGooglePlayOrder) returns (ResCommon);
     rpc solveGooglePayOrderV3 (ReqSolveGooglePlayOrderV3) returns (ResCommon);
+    rpc deliverAA32Order (ReqDeliverAA32Order) returns (ResCommon);
     rpc fetchMisc (ReqCommon) returns (ResMisc);
     rpc modifySignature (ReqModifySignature) returns (ResCommon);
     rpc fetchIDCardInfo (ReqCommon) returns (ResIDCardInfo);
@@ -2091,6 +2371,7 @@ service Lobby {
     rpc completeActivityTask (ReqCompleteActivityTask) returns (ResCommon);
     rpc completeActivityFlipTask (ReqCompleteActivityTask) returns (ResCommon);
     rpc completePeriodActivityTask (ReqCompleteActivityTask) returns (ResCommon);
+    rpc completePeriodActivityTaskBatch (ReqCompletePeriodActivityTaskBatch) returns (ResCommon);
     rpc completeRandomActivityTask (ReqCompleteActivityTask) returns (ResCommon);
     rpc receiveActivityFlipTask (ReqReceiveActivityFlipTask) returns (ResReceiveActivityFlipTask);
     rpc completeSegmentTaskReward (ReqCompleteSegmentTaskReward) returns (ResCompleteSegmentTaskReward);
@@ -2106,6 +2387,8 @@ service Lobby {
     rpc refreshGameObserveAuth (ReqRefreshGameObserveAuth) returns (ResRefreshGameObserveAuth);
     rpc fetchActivityBuff (ReqCommon) returns (ResActivityBuff);
     rpc upgradeActivityBuff (ReqUpgradeActivityBuff) returns (ResActivityBuff);
+    rpc upgradeActivityLevel (ReqUpgradeActivityLevel) returns (ResUpgradeActivityLevel);
+    rpc receiveUpgradeActivityReward (ReqReceiveUpgradeActivityReward) returns (ResReceiveUpgradeActivityReward);
     rpc upgradeChallenge (ReqCommon) returns (ResUpgradeChallenge);
     rpc refreshChallenge (ReqCommon) returns (ResRefreshChallenge);
     rpc fetchChallengeInfo (ReqCommon) returns (ResFetchChallengeInfo);
@@ -2128,7 +2411,9 @@ service Lobby {
     rpc checkPrivacy (ReqCheckPrivacy) returns (ResCommon);
     rpc responseCaptcha (ReqResponseCaptcha) returns (ResCommon);
     rpc fetchRPGBattleHistory (ReqFetchRPGBattleHistory) returns (ResFetchRPGBattleHistory);
+    rpc fetchRPGBattleHistoryV2 (ReqFetchRPGBattleHistory) returns (ResFetchRPGBattleHistoryV2);
     rpc receiveRPGRewards (ReqReceiveRPGRewards) returns (ResReceiveRPGRewards);
+    rpc receiveRPGReward (ReqReceiveRPGReward) returns (ResReceiveRPGRewards);
     rpc buyArenaTicket (ReqBuyArenaTicket) returns (ResCommon);
     rpc enterArena (ReqEnterArena) returns (ResCommon);
     rpc receiveArenaReward (ReqArenaReward) returns (ResArenaReward);
@@ -2137,14 +2422,42 @@ service Lobby {
     rpc feedActivityFeed (ReqFeedActivityFeed) returns (ResFeedActivityFeed);
     rpc sendActivityGiftToFriend (ReqSendActivityGiftToFriend) returns (ResSendActivityGiftToFriend);
     rpc receiveActivityGift (ReqReceiveActivityGift) returns (ResCommon);
-    rpc fetchFriendFeedActivityData (ReqFetchFriendFeedActivityData) returns (ResFetchFriendFeedActivityData);
+    rpc receiveAllActivityGift (ReqReceiveAllActivityGift) returns (ResReceiveAllActivityGift);
+    rpc fetchFriendGiftActivityData (ReqFetchFriendGiftActivityData) returns (ResFetchFriendGiftActivityData);
     rpc openPreChestItem (ReqOpenPreChestItem) returns (ResOpenPreChestItem);
+    rpc fetchVoteActivity (ReqFetchVoteActivity) returns (ResFetchVoteActivity);
+    rpc voteActivity (ReqVoteActivity) returns (ResVoteActivity);
+    rpc unlockActivitySpot (ReqUnlockActivitySpot) returns (ResCommon);
+    rpc receiveActivitySpotReward (ReqReceiveActivitySpotReward) returns (ResReceiveActivitySpotReward);
+    rpc deleteAccount (ReqCommon) returns (ResDeleteAccount);
+    rpc cancelDeleteAccount (ReqCommon) returns (ResCommon);
+    rpc logReport (ReqLogReport) returns (ResCommon);
+    rpc bindOauth2 (ReqBindOauth2) returns (ResCommon);
+    rpc fetchOauth2Info (ReqFetchOauth2) returns (ResFetchOauth2);
+    rpc setLoadingImage (ReqSetLoadingImage) returns (ResCommon);
+    rpc fetchShopInterval (ReqCommon) returns (ResFetchShopInterval);
+    rpc fetchActivityInterval (ReqCommon) returns (ResFetchActivityInterval);
+    rpc fetchRecentFriend (ReqCommon) returns (ResFetchrecentFriend);
+    rpc openGacha (ReqOpenGacha) returns (ResOpenGacha);
 }
 
 message ResConnectionInfo {
 
     Error error = 1;
     NetworkEndpoint client_endpoint = 2;
+}
+
+message ResFetchQueueInfo {
+
+    Error error = 1;
+    uint32 remain = 2;
+    uint32 rank = 3;
+}
+
+message ReqOpenidCheck {
+
+    uint32 type = 1;
+    string token = 2;
 }
 
 message ReqSignupAccount {
@@ -2155,6 +2468,7 @@ message ReqSignupAccount {
     uint32 type = 4;
     ClientDeviceInfo device = 5;
     string client_version_string = 6;
+    string tag = 7;
 }
 
 message ResSignupAccount {
@@ -2175,6 +2489,7 @@ message ReqLogin {
     uint32 type = 9;
     uint32 version = 10;
     string client_version_string = 11;
+    string tag = 12;
 }
 
 message ResLogin {
@@ -2309,6 +2624,7 @@ message ReqOauth2Signup {
     ClientDeviceInfo device = 5;
     ClientVersionInfo client_version = 6;
     string client_version_string = 7;
+    string tag = 8;
 }
 
 message ResOauth2Signup {
@@ -2328,6 +2644,7 @@ message ReqOauth2Login {
     repeated uint32 currency_platforms = 8;
     uint32 version = 9;
     string client_version_string = 10;
+    string tag = 11;
 }
 
 message ReqDMMPreLogin {
@@ -2386,6 +2703,7 @@ message ReqCreateNickname {
 
     string nickname = 1;
     string advertise_str = 2;
+    string tag = 3;
 }
 
 message ReqModifyNickname {
@@ -3081,6 +3399,7 @@ message ReqCreateBillingOrder {
     uint32 payment_platform = 2;
     uint32 client_type = 3;
     uint32 account_id = 4;
+    string client_version_string = 5;
 }
 
 message ResCreateBillingOrder {
@@ -3114,6 +3433,7 @@ message ReqCreateWechatNativeOrder {
     uint32 client_type = 2;
     uint32 account_id = 3;
     string account_ip = 4;
+    string client_version_string = 5;
 }
 
 message ResCreateWechatNativeOrder {
@@ -3129,6 +3449,7 @@ message ReqCreateWechatAppOrder {
     uint32 client_type = 2;
     uint32 account_id = 3;
     string account_ip = 4;
+    string client_version_string = 5;
 }
 
 message ResCreateWechatAppOrder {
@@ -3155,6 +3476,7 @@ message ReqCreateAlipayOrder {
     uint32 account_id = 3;
     string alipay_trade_type = 4;
     string return_url = 5;
+    string client_version_string = 6;
 }
 
 message ResCreateAlipayOrder {
@@ -3168,6 +3490,7 @@ message ReqCreateAlipayScanOrder {
     uint32 goods_id = 1;
     uint32 client_type = 2;
     uint32 account_id = 3;
+    string client_version_string = 4;
 }
 
 message ResCreateAlipayScanOrder {
@@ -3183,6 +3506,7 @@ message ReqCreateAlipayAppOrder {
     uint32 goods_id = 1;
     uint32 client_type = 2;
     uint32 account_id = 3;
+    string client_version_string = 4;
 }
 
 message ResCreateAlipayAppOrder {
@@ -3198,6 +3522,7 @@ message ReqCreateJPCreditCardOrder {
     uint32 account_id = 3;
     string return_url = 4;
     string access_token = 5;
+    string client_version_string = 6;
 }
 
 message ResCreateJPCreditCardOrder {
@@ -3213,6 +3538,7 @@ message ReqCreateJPPaypalOrder {
     uint32 account_id = 3;
     string return_url = 4;
     string access_token = 5;
+    string client_version_string = 6;
 }
 
 message ResCreateJPPaypalOrder {
@@ -3228,6 +3554,7 @@ message ReqCreateJPAuOrder {
     uint32 account_id = 3;
     string return_url = 4;
     string access_token = 5;
+    string client_version_string = 6;
 }
 
 message ResCreateJPAuOrder {
@@ -3243,6 +3570,7 @@ message ReqCreateJPDocomoOrder {
     uint32 account_id = 3;
     string return_url = 4;
     string access_token = 5;
+    string client_version_string = 6;
 }
 
 message ResCreateJPDocomoOrder {
@@ -3258,6 +3586,7 @@ message ReqCreateJPWebMoneyOrder {
     uint32 account_id = 3;
     string return_url = 4;
     string access_token = 5;
+    string client_version_string = 6;
 }
 
 message ResCreateJPWebMoneyOrder {
@@ -3273,6 +3602,7 @@ message ReqCreateJPSoftbankOrder {
     uint32 account_id = 3;
     string return_url = 4;
     string access_token = 5;
+    string client_version_string = 6;
 }
 
 message ResCreateJPSoftbankOrder {
@@ -3281,12 +3611,40 @@ message ResCreateJPSoftbankOrder {
     string order_id = 2;
 }
 
+message ReqCreateJPPayPayOrder {
+
+    uint32 goods_id = 1;
+    uint32 client_type = 2;
+    uint32 account_id = 3;
+    string return_url = 4;
+    string access_token = 5;
+    string client_version_string = 6;
+}
+
+message ResCreateJPPayPayOrder {
+
+    Error error = 1;
+    string order_id = 2;
+}
+
+message ReqFetchJPCommonCreditCardOrder {
+
+    string order_id = 1;
+    uint32 account_id = 2;
+}
+
+message ResFetchJPCommonCreditCardOrder {
+
+    Error error = 1;
+}
+
 message ReqCreateYostarOrder {
 
     uint32 goods_id = 1;
     uint32 client_type = 2;
     uint32 account_id = 3;
     uint32 order_type = 4;
+    string client_version_string = 5;
 }
 
 message ResCreateYostarOrder {
@@ -3302,6 +3660,7 @@ message ReqCreateENPaypalOrder {
     uint32 account_id = 3;
     string return_url = 4;
     string access_token = 5;
+    string client_version_string = 6;
 }
 
 message ResCreateENPaypalOrder {
@@ -3317,6 +3676,7 @@ message ReqCreateENJCBOrder {
     uint32 account_id = 3;
     string return_url = 4;
     string access_token = 5;
+    string client_version_string = 6;
 }
 
 message ResCreateENJCBOrder {
@@ -3332,6 +3692,7 @@ message ReqCreateENMasterCardOrder {
     uint32 account_id = 3;
     string return_url = 4;
     string access_token = 5;
+    string client_version_string = 6;
 }
 
 message ResCreateENMasterCardOrder {
@@ -3347,6 +3708,7 @@ message ReqCreateENVisaOrder {
     uint32 account_id = 3;
     string return_url = 4;
     string access_token = 5;
+    string client_version_string = 6;
 }
 
 message ResCreateENVisaOrder {
@@ -3362,9 +3724,90 @@ message ReqCreateENAlipayOrder {
     uint32 account_id = 3;
     string return_url = 4;
     string access_token = 5;
+    string client_version_string = 6;
 }
 
 message ResCreateENAlipayOrder {
+
+    Error error = 1;
+    string order_id = 2;
+}
+
+message ReqCreateKRPaypalOrder {
+
+    uint32 goods_id = 1;
+    uint32 client_type = 2;
+    uint32 account_id = 3;
+    string return_url = 4;
+    string access_token = 5;
+    string client_version_string = 6;
+}
+
+message ResCreateKRPaypalOrder {
+
+    Error error = 1;
+    string order_id = 2;
+}
+
+message ReqCreateKRJCBOrder {
+
+    uint32 goods_id = 1;
+    uint32 client_type = 2;
+    uint32 account_id = 3;
+    string return_url = 4;
+    string access_token = 5;
+    string client_version_string = 6;
+}
+
+message ResCreateKRJCBOrder {
+
+    Error error = 1;
+    string order_id = 2;
+}
+
+message ReqCreateKRMasterCardOrder {
+
+    uint32 goods_id = 1;
+    uint32 client_type = 2;
+    uint32 account_id = 3;
+    string return_url = 4;
+    string access_token = 5;
+    string client_version_string = 6;
+}
+
+message ResCreateKRMasterCardOrder {
+
+    Error error = 1;
+    string order_id = 2;
+}
+
+message ReqCreateKRVisaOrder {
+
+    uint32 goods_id = 1;
+    uint32 client_type = 2;
+    uint32 account_id = 3;
+    string return_url = 4;
+    string access_token = 5;
+    string client_version_string = 6;
+}
+
+message ResCreateKRVisaOrder {
+
+    Error error = 1;
+    string order_id = 2;
+}
+
+message ReqCreateKRAlipayOrder {
+
+    uint32 goods_id = 1;
+    uint32 client_type = 2;
+    uint32 account_id = 3;
+    string return_url = 4;
+    string access_token = 5;
+    string client_version_string = 6;
+}
+
+message ResCreateKRAlipayOrder {
 
     Error error = 1;
     string order_id = 2;
@@ -3375,6 +3818,7 @@ message ReqCreateDMMOrder {
     uint32 goods_id = 1;
     uint32 account_id = 2;
     uint32 client_type = 3;
+    string client_version_string = 4;
 }
 
 message ResCreateDmmOrder {
@@ -3396,6 +3840,7 @@ message ReqCreateIAPOrder {
     uint32 account_id = 3;
     string access_token = 4;
     string debt_order_id = 5;
+    string client_version_string = 6;
 }
 
 message ResCreateIAPOrder {
@@ -3425,6 +3870,7 @@ message ReqCreateSteamOrder {
     uint32 goods_id = 4;
     string steam_id = 5;
     string debt_order_id = 6;
+    string client_version_string = 7;
 }
 
 message ResCreateSteamOrder {
@@ -3446,6 +3892,7 @@ message ReqCreateMyCardOrder {
     uint32 client_type = 2;
     uint32 account_id = 3;
     string debt_order_id = 4;
+    string client_version_string = 5;
 }
 
 message ResCreateMyCardOrder {
@@ -3467,6 +3914,7 @@ message ReqCreatePaypalOrder {
     uint32 client_type = 2;
     uint32 account_id = 3;
     string debt_order_id = 4;
+    string client_version_string = 5;
 }
 
 message ResCreatePaypalOrder {
@@ -3483,6 +3931,7 @@ message ReqCreateXsollaOrder {
     uint32 account_id = 3;
     uint32 payment_method = 4;
     string debt_order_id = 5;
+    string client_version_string = 6;
 }
 
 message ResCreateXsollaOrder {
@@ -3490,6 +3939,13 @@ message ResCreateXsollaOrder {
     Error error = 1;
     string order_id = 2;
     string url = 3;
+}
+
+message ReqDeliverAA32Order {
+
+    uint32 account_id = 1;
+    string nsa_id = 2;
+    string nsa_token = 3;
 }
 
 message ReqOpenChest {
@@ -3717,8 +4173,14 @@ message ReqBuyFromShop {
 
     uint32 goods_id = 1;
     uint32 count = 2;
-    repeated BillShortcut bill_short_cut = 3;
-    uint32 deal_price = 4;
+    repeated Item ver_price = 3;
+    repeated Item ver_goods = 4;
+
+    message Item {
+
+        uint32 id = 1;
+        uint32 count = 2;
+    }
 }
 
 message ResBuyFromShop {
@@ -3996,6 +4458,11 @@ message ResAccountActivityData {
     repeated lq.ActivityArenaData arena_data = 15;
     repeated lq.FeedActivityData feed_data = 16;
     repeated lq.SegmentTaskProgress segment_task_progress_list = 17;
+    repeated lq.VoteData vote_records = 18;
+    repeated lq.ActivitySpotData spot_data = 19;
+    repeated lq.ActivityFriendGiftData friend_gift_data = 20;
+    repeated lq.ActivityUpgradeData upgrade_data = 21;
+    repeated lq.ActivityGachaUpdateData gacha_data = 22;
 
     message ActivitySignInData {
 
@@ -4063,6 +4530,11 @@ message ResExchangeActivityItem {
 message ReqCompleteActivityTask {
 
     uint32 task_id = 1;
+}
+
+message ReqCompletePeriodActivityTaskBatch {
+
+    repeated uint32 task_list = 1;
 }
 
 message ReqReceiveActivityFlipTask {
@@ -4229,18 +4701,56 @@ message ResRefreshGameObserveAuth {
 message ResActivityBuff {
 
     Error error = 1;
-    repeated ActivityBuffData buff_list = 2;
-
-    message ActivityBuffData {
-
-        uint32 buff_id = 1;
-        uint32 level = 2;
-    }
+    repeated lq.ActivityBuffData buff_list = 2;
 }
 
 message ReqUpgradeActivityBuff {
 
     uint32 buff_id = 1;
+}
+
+message ReqUpgradeActivityLevel {
+
+    uint32 activity_id = 1;
+    uint32 group = 2;
+    uint32 count = 3;
+}
+
+message ResUpgradeActivityLevel {
+
+    Error error = 1;
+    repeated ExecuteReward rewards = 2;
+}
+
+message ReqReceiveUpgradeActivityReward {
+
+    uint32 activity_id = 1;
+}
+
+message ResReceiveUpgradeActivityReward {
+
+    Error error = 1;
+    repeated ExecuteReward rewards = 2;
+}
+
+message ReqReceiveAllActivityGift {
+
+    uint32 activity_id = 1;
+}
+
+message ResReceiveAllActivityGift {
+
+    Error error = 1;
+    repeated ExecuteReward rewards = 2;
+    repeated ReceiveRewards receive_gift = 3;
+
+    message ReceiveRewards {
+
+        uint32 id = 1;
+        uint32 from_account_id = 2;
+        uint32 item_id = 3;
+        uint32 count = 4;
+    }
 }
 
 message ResUpgradeChallenge {
@@ -4485,6 +4995,28 @@ message ResFetchRPGBattleHistory {
     }
 }
 
+message ResFetchRPGBattleHistoryV2 {
+
+    Error error = 1;
+    repeated BattleResultV2 battle_result = 2;
+    lq.RPGState start_state = 3;
+    lq.RPGState current_state = 4;
+    repeated BattleResultV2 recent_battle_result = 5;
+
+    message BattleResultV2 {
+
+        string uuid = 14;
+        uint32 chang = 1;
+        uint32 ju = 2;
+        uint32 ben = 3;
+        uint32 damage = 5;
+        uint32 monster_seq = 7;
+        uint32 killed = 9;
+        repeated lq.ActivityBuffData buff = 10;
+        uint32 points = 11;
+    }
+}
+
 message ReqBuyArenaTicket {
 
     uint32 activity_id = 1;
@@ -4515,6 +5047,12 @@ message ResArenaReward {
 message ReqReceiveRPGRewards {
 
     uint32 activity_id = 1;
+}
+
+message ReqReceiveRPGReward {
+
+    uint32 activity_id = 1;
+    uint32 monster_seq = 2;
 }
 
 message ResReceiveRPGRewards {
@@ -4599,13 +5137,13 @@ message ReqReceiveActivityGift {
     uint32 id = 2;
 }
 
-message ReqFetchFriendFeedActivityData {
+message ReqFetchFriendGiftActivityData {
 
     uint32 activity_id = 1;
     repeated uint32 account_list = 2;
 }
 
-message ResFetchFriendFeedActivityData {
+message ResFetchFriendGiftActivityData {
 
     Error error = 1;
     repeated FriendData list = 2;
@@ -4634,6 +5172,132 @@ message ResOpenPreChestItem {
 
     Error error = 1;
     repeated OpenResult results = 2;
+}
+
+message ReqFetchVoteActivity {
+
+    uint32 activity_id = 1;
+}
+
+message ResFetchVoteActivity {
+
+    Error error = 1;
+    repeated uint32 vote_rank = 2;
+    uint32 update_time = 3;
+}
+
+message ReqVoteActivity {
+
+    uint32 vote = 1;
+    uint32 activity_id = 2;
+}
+
+message ResVoteActivity {
+
+    Error error = 1;
+    repeated VoteData vote_records = 2;
+}
+
+message ReqUnlockActivitySpot {
+
+    uint32 unique_id = 1;
+    uint32 ending_id = 2;
+}
+
+message ReqReceiveActivitySpotReward {
+
+    uint32 unique_id = 1;
+}
+
+message ResReceiveActivitySpotReward {
+
+    Error error = 1;
+    repeated RewardItem items = 2;
+
+    message RewardItem {
+
+        uint32 id = 1;
+        uint32 count = 2;
+    }
+}
+
+message ReqLogReport {
+
+    uint32 success = 1;
+    uint32 failed = 2;
+}
+
+message ReqBindOauth2 {
+
+    uint32 type = 1;
+    string token = 2;
+}
+
+message ReqFetchOauth2 {
+
+    uint32 type = 1;
+}
+
+message ResFetchOauth2 {
+
+    Error error = 1;
+    string openid = 2;
+}
+
+message ResDeleteAccount {
+
+    Error error = 1;
+    uint32 delete_time = 2;
+}
+
+message ReqSetLoadingImage {
+
+    repeated uint32 images = 1;
+}
+
+message ResFetchShopInterval {
+
+    Error error = 1;
+    repeated ShopInterval result = 2;
+
+    message ShopInterval {
+
+        uint32 group_id = 1;
+        uint32 interval = 2;
+    }
+}
+
+message ResFetchActivityInterval {
+
+    Error error = 1;
+    repeated ActivityInterval result = 2;
+
+    message ActivityInterval {
+
+        uint32 activity_id = 1;
+        uint32 interval = 2;
+    }
+}
+
+message ResFetchrecentFriend {
+
+    Error error = 1;
+    repeated uint32 account_list = 2;
+}
+
+message ReqOpenGacha {
+
+    uint32 activity_id = 1;
+    uint32 count = 2;
+}
+
+message ResOpenGacha {
+
+    Error error = 1;
+    repeated uint32 result_list = 2;
+    repeated ExecuteReward reward_items = 3;
+    repeated ExecuteReward sp_reward_items = 4;
+    uint32 remain_count = 5;
 }
 
 message ActionMJStart {
@@ -4693,6 +5357,7 @@ message ActionNewRound {
     MuyuInfo muyu = 16;
     uint32 ju_count = 17;
     uint32 field_spell = 18;
+    string sha256 = 19;
 }
 
 message RecordNewRound {
@@ -4718,6 +5383,7 @@ message RecordNewRound {
     repeated OptionalOperationList operations = 19;
     uint32 ju_count = 20;
     uint32 field_spell = 21;
+    string sha256 = 22;
 
     message TingPai {
 
@@ -4879,6 +5545,9 @@ message HuleInfo {
     uint32 point_sum = 19;
     uint32 dadian = 20;
     uint32 baopai = 21;
+    repeated uint32 baopai_seats = 22;
+    repeated string lines = 23;
+    uint32 tianming_bonus = 24;
 }
 
 message TingPaiInfo {
@@ -5079,6 +5748,7 @@ message ActionDealTile {
     repeated TingPaiDiscardInfo tingpais = 8;
     uint32 tile_state = 9;
     MuyuInfo muyu = 10;
+    uint32 tile_index = 11;
 }
 
 message RecordDealTile {
@@ -5092,6 +5762,23 @@ message RecordDealTile {
     OptionalOperationList operation = 8;
     uint32 tile_state = 9;
     MuyuInfo muyu = 11;
+    uint32 tile_index = 12;
+}
+
+message ActionFillAwaitingTiles {
+
+    repeated string awaiting_tiles = 1;
+    uint32 left_tile_count = 2;
+    OptionalOperationList operation = 3;
+    LiQiSuccess liqi = 4;
+}
+
+message RecordFillAwaitingTiles {
+
+    repeated string awaiting_tiles = 1;
+    uint32 left_tile_count = 2;
+    OptionalOperationList operation = 3;
+    LiQiSuccess liqi = 4;
 }
 
 message ActionChiPengGang {
